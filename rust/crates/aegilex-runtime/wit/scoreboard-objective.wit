@@ -1,0 +1,29 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/scoreboard/objective.h
+interface objective {
+    use criteria.{criteria};
+    use display-slot.{display-slot};
+    use objective-sort-order.{objective-sort-order};
+    use render-type.{render-type};
+    use score-entry.{score-entry};
+    use types.{host-error};
+
+    resource objective {
+        get-name: func() -> result<string, host-error>;
+        get-display-name: func() -> result<string, host-error>;
+        set-display-name: func(display-name: string) -> result<_, host-error>;
+        get-criteria: func() -> result<criteria, host-error>;
+        is-modifiable: func() -> result<bool, host-error>;
+        is-displayed: func() -> result<bool, host-error>;
+        get-display-slot: func() -> result<option<display-slot>, host-error>;
+        set-display-slot: func(slot: option<display-slot>) -> result<_, host-error>;
+        get-sort-order: func() -> result<option<objective-sort-order>, host-error>;
+        set-sort-order: func(order: objective-sort-order) -> result<_, host-error>;
+        set-display: func(slot: option<display-slot>, order: objective-sort-order) -> result<_, host-error>;
+        get-render-type: func() -> result<render-type, host-error>;
+        get-score-value: func(entry: borrow<score-entry>) -> result<s32, host-error>;
+        set-score-value: func(entry: borrow<score-entry>, value: s32) -> result<_, host-error>;
+        unregister: func() -> result<_, host-error>;
+    }
+}

@@ -1,0 +1,35 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/level/dimension.h
+interface dimension {
+    use actor.{actor};
+    use block.{block};
+    use block-data.{block-data, block-state-pair};
+    use chunk.{chunk};
+    use item-stack.{item-stack};
+    use location.{location};
+    use types.{host-error};
+
+    enum dimension-kind {
+        overworld,
+        nether,
+        the-end,
+        custom,
+    }
+
+    record dimension {
+        name: string,
+        kind: dimension-kind,
+        level: string,
+    }
+
+    list-loaded-chunks: func(dimension: string) -> result<list<chunk>, host-error>;
+    get-block: func(dimension: string, x: s32, y: s32, z: s32) -> result<block, host-error>;
+    set-block: func(dimension: string, x: s32, y: s32, z: s32, type-id: string, states: list<block-state-pair>, apply-physics: option<bool>) -> result<_, host-error>;
+    get-highest-block-y: func(dimension: string, x: s32, z: s32) -> result<s32, host-error>;
+    get-highest-block: func(dimension: string, x: s32, z: s32) -> result<block, host-error>;
+    get-relative: func(dimension: string, x: s32, y: s32, z: s32, dx: s32, dy: s32, dz: s32) -> result<block, host-error>;
+    create-block-data: func(type-id: string, states: list<block-state-pair>) -> result<block-data, host-error>;
+    spawn-actor: func(dimension: string, location: location, actor-type: string) -> result<actor, host-error>;
+    drop-item: func(dimension: string, location: location, item: borrow<item-stack>) -> result<actor, host-error>;
+}

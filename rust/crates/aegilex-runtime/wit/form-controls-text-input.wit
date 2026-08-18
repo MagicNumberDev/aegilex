@@ -1,0 +1,13 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/form/controls/text_input.h
+// Copied form control value imported by world plugin.
+interface form-text-input {
+    use message.{message};
+
+    record text-input {
+        label: message,
+        placeholder: message,
+        default-value: option<string>,
+    }
+}

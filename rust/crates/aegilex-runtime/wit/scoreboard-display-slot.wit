@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/scoreboard/display_slot.h
+interface display-slot {
+    enum display-slot {
+        below-name,
+        player-list,
+        side-bar,
+    }
+}

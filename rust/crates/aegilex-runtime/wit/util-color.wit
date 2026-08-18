@@ -1,0 +1,11 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/util/color.h
+interface color {
+    record color {
+        red: u8,
+        green: u8,
+        blue: u8,
+        alpha: u8,
+    }
+}

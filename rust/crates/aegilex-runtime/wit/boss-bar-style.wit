@@ -1,0 +1,12 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/boss/bar_style.h
+interface bar-style {
+    enum boss-bar-style {
+        solid,
+        segmented6,
+        segmented10,
+        segmented12,
+        segmented20,
+    }
+}

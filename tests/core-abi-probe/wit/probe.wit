@@ -1,0 +1,27 @@
+package aegilex:core-abi-probe@0.1.0;
+
+interface probe {
+    record echo-input {
+        message: string,
+        count: u32,
+    }
+
+    echo: func(input: echo-input) -> string;
+    maybe: func(value: option<u32>) -> result<u32, string>;
+    log: func(message: string);
+}
+
+interface callbacks {
+    resource sink {
+        push: func(value: string);
+        drain: func() -> list<string>;
+    }
+
+    on-tick: func() -> result<_, string>;
+}
+
+world probe-world {
+    import probe;
+    export callbacks;
+    export entry: func() -> string;
+}

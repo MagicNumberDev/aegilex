@@ -1,0 +1,19 @@
+package aegilex:endstone@0.1.0;
+
+interface commands {
+    use command-sender.{command-sender};
+
+    record invocation {
+        subcommand: string,
+        args: list<string>,
+        sender: command-sender,
+    }
+
+    record outcome {
+        handled: bool,
+        reply: option<string>,
+        error: option<string>,
+    }
+
+    on-command: func(command: invocation) -> result<outcome, string>;
+}

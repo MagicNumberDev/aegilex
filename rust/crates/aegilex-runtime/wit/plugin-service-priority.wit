@@ -1,0 +1,13 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/plugin/service_priority.h
+// Copied service priority value imported by world plugin.
+interface service-priority {
+    enum service-priority {
+        lowest,
+        low,
+        normal,
+        high,
+        highest,
+    }
+}

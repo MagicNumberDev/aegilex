@@ -1,0 +1,29 @@
+package aegilex:endstone@0.1.0;
+
+// Value types shared by plugin metadata, current-plugin context, and the
+// server-owned plugin manager. These are immutable snapshots, not live plugin
+// object handles.
+interface plugin-types {
+    use permission-attachment.{permission-child};
+    use permission-default.{permission-default};
+
+    enum load-order {
+        startup,
+        post-world,
+    }
+
+    record command {
+        name: string,
+        description: option<string>,
+        aliases: list<string>,
+        usages: list<string>,
+        permissions: list<string>,
+    }
+
+    record plugin-permission {
+        name: string,
+        description: option<string>,
+        default-value: option<permission-default>,
+        children: list<permission-child>,
+    }
+}

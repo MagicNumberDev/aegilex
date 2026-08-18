@@ -1,0 +1,39 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/form/modal_form.h
+// Copied modal-form protocol imported by world plugin.
+interface modal-form {
+    use form.{form};
+    use form-dropdown.{dropdown};
+    use form-divider.{divider};
+    use form-header.{header};
+    use form-label.{label};
+    use form-slider.{slider};
+    use form-step-slider.{step-slider};
+    use form-text-input.{text-input};
+    use form-toggle.{toggle};
+    use message.{message};
+
+    variant modal-control {
+        dropdown(dropdown),
+        slider(slider),
+        step-slider(step-slider),
+        text-input(text-input),
+        toggle(toggle),
+        label(label),
+        header(header),
+        divider(divider),
+    }
+
+    record modal-form-spec {
+        title: message,
+        controls: list<modal-control>,
+        submit-button: option<message>,
+        icon: option<string>,
+    }
+
+    record modal-response {
+        json: string,
+    }
+
+}

@@ -1,0 +1,11 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/lang/language.h
+interface language {
+    use translatable.{translatable};
+    use types.{host-error};
+
+    translate-text: func(text: string) -> result<string, host-error>;
+    translate-text-with-parameters: func(text: string, parameters: list<string>) -> result<string, host-error>;
+    translate: func(message: translatable) -> result<string, host-error>;
+}

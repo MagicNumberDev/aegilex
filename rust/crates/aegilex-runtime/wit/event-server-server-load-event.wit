@@ -1,0 +1,9 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/server/server_load_event.h
+interface server-load-event {
+    use types.{host-error};
+
+    resource server-load-event { get-load-type: func() -> result<server-load-type, host-error>; }
+    enum server-load-type { startup, reload }
+}

@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/command/block_command_sender.h
+interface block-command-sender {
+    use command-sender.{command-sender};
+    use block.{block};
+    use types.{host-error};
+
+    get-block: func(sender: borrow<command-sender>) -> result<block, host-error>;
+}

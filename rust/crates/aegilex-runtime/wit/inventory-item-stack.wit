@@ -1,0 +1,41 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/inventory/item_stack.h
+interface item-stack {
+    use item-meta.{item-meta};
+    use nbt.{tag};
+    use types.{host-error};
+
+    resource item-stack {
+        get-type-id: func() -> result<string, host-error>;
+        set-type: func(type-id: string) -> result<_, host-error>;
+        get-amount: func() -> result<s32, host-error>;
+        set-amount: func(amount: s32) -> result<_, host-error>;
+        get-data: func() -> result<s32, host-error>;
+        set-data: func(data: s32) -> result<_, host-error>;
+        get-translation-key: func() -> result<string, host-error>;
+        get-max-stack-size: func() -> result<s32, host-error>;
+        clone: func() -> result<item-stack, host-error>;
+        is-similar: func(other: borrow<item-stack>) -> result<bool, host-error>;
+        get-meta: func() -> result<item-meta, host-error>;
+        has-meta: func() -> result<bool, host-error>;
+        set-meta: func(meta: borrow<item-meta>) -> result<bool, host-error>;
+        get-nbt: func() -> result<tag, host-error>;
+        set-nbt: func(value: borrow<tag>) -> result<_, host-error>;
+        can-enchant: func(enchantment: string) -> result<bool, host-error>;
+    }
+
+    // A callback-scoped, read-only view of an externally owned ItemStack.
+    resource item-stack-ref {
+        get-type-id: func() -> result<string, host-error>;
+        get-amount: func() -> result<s32, host-error>;
+        get-data: func() -> result<s32, host-error>;
+        get-translation-key: func() -> result<string, host-error>;
+        get-max-stack-size: func() -> result<s32, host-error>;
+        clone: func() -> result<item-stack, host-error>;
+        is-similar: func(other: borrow<item-stack>) -> result<bool, host-error>;
+        get-meta: func() -> result<item-meta, host-error>;
+        has-meta: func() -> result<bool, host-error>;
+        get-nbt: func() -> result<tag, host-error>;
+    }
+}

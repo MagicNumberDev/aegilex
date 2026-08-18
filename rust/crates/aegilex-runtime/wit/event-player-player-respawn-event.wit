@@ -1,0 +1,9 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/player/player_respawn_event.h
+interface player-respawn-event {
+    use player.{player};
+    use types.{host-error};
+
+    resource player-respawn-event { get-player: func() -> result<player, host-error>; }
+}

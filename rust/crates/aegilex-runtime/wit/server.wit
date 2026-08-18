@@ -1,0 +1,82 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/server.h
+interface server {
+    use command-sender.{command-sender};
+    use item-type.{item-type-data};
+    use message.{message};
+    use plugin-command.{plugin-command};
+    use player.{player};
+    use types.{host-error};
+    use uuid.{uuid};
+
+    type timestamp-ms = s64;
+
+    record server-data {
+        name: string,
+        version: string,
+        minecraft-version: string,
+        protocol-version: s32,
+        max-players: s32,
+        port: s32,
+        port-v6: s32,
+        online-mode: bool,
+        primary-thread: bool,
+    }
+
+    record server-performance {
+        current-ms-per-tick: f32,
+        average-ms-per-tick: f32,
+        current-tps: f32,
+        average-tps: f32,
+        current-tick-usage: f32,
+        average-tick-usage: f32,
+        start-time-ms: timestamp-ms,
+    }
+
+    record enchantment-data {
+        id: string,
+        translation-key: string,
+        max-level: s32,
+        start-level: s32,
+    }
+
+    // Identity and configuration — mirrors Endstone's Server getters.
+    get-name: func() -> result<string, host-error>;
+    get-version: func() -> result<string, host-error>;
+    get-minecraft-version: func() -> result<string, host-error>;
+    get-protocol-version: func() -> result<s32, host-error>;
+    get-max-players: func() -> result<s32, host-error>;
+    set-max-players: func(max: s32) -> result<_, host-error>;
+    get-port: func() -> result<s32, host-error>;
+    get-port-v6: func() -> result<s32, host-error>;
+    get-online-mode: func() -> result<bool, host-error>;
+    is-primary-thread: func() -> result<bool, host-error>;
+
+    // Performance — mirrors Endstone's performance getters.
+    get-current-ms-per-tick: func() -> result<f32, host-error>;
+    get-average-ms-per-tick: func() -> result<f32, host-error>;
+    get-current-tps: func() -> result<f32, host-error>;
+    get-average-tps: func() -> result<f32, host-error>;
+    get-current-tick-usage: func() -> result<f32, host-error>;
+    get-average-tick-usage: func() -> result<f32, host-error>;
+    get-start-time-ms: func() -> result<timestamp-ms, host-error>;
+
+    // Players — online players and lookups return invocation-scoped resources.
+    list-online-players: func() -> result<list<player>, host-error>;
+    find-player-by-name: func(name: string) -> result<option<player>, host-error>;
+    find-player-by-uuid: func(id: uuid) -> result<option<player>, host-error>;
+
+    // Messaging.
+    broadcast: func(message: message, permission: option<string>) -> result<_, host-error>;
+    dispatch-console-command: func(command-line: string) -> result<bool, host-error>;
+
+    get-command-sender: func() -> result<command-sender, host-error>;
+    get-plugin-command: func(name: string) -> result<option<plugin-command>, host-error>;
+    registry-item-type-get: func(type-id: string) -> result<option<item-type-data>, host-error>;
+    // Returns the full sorted registry list from the host-side cache, which is
+    // refilled after each plugin disable.
+    registry-item-type-list: func() -> result<list<item-type-data>, host-error>;
+    registry-enchantment-get: func(id: string) -> result<option<enchantment-data>, host-error>;
+    registry-enchantment-list: func() -> result<list<enchantment-data>, host-error>;
+}

@@ -1,0 +1,119 @@
+package aegilex:endstone@0.1.0;
+
+interface events {
+    use player-join-event.{player-join-event};
+    use player-quit-event.{player-quit-event};
+    use player-chat-event.{player-chat-event};
+    use player-kick-event.{player-kick-event};
+    use player-command-event.{player-command-event};
+    use player-game-mode-change-event.{player-game-mode-change-event};
+    use player-teleport-event.{player-teleport-event};
+    use player-drop-item-event.{player-drop-item-event};
+    use block-break-event.{block-break-event};
+    use block-place-event.{block-place-event};
+    use actor-damage-event.{actor-damage-event};
+    use server-command-event.{server-command-event};
+    use player-bed-enter-event.{player-bed-enter-event};
+    use player-bed-leave-event.{player-bed-leave-event};
+    use player-dimension-change-event.{player-dimension-change-event};
+    use player-emote-event.{player-emote-event};
+    use player-interact-event.{player-interact-event};
+    use player-interact-actor-event.{player-interact-actor-event};
+    use player-item-consume-event.{player-item-consume-event};
+    use player-item-held-event.{player-item-held-event};
+    use player-jump-event.{player-jump-event};
+    use player-login-event.{player-login-event};
+    use player-move-event.{player-move-event};
+    use player-pickup-item-event.{player-pickup-item-event};
+    use player-portal-event.{player-portal-event};
+    use player-respawn-event.{player-respawn-event};
+    use player-skin-change-event.{player-skin-change-event};
+    use block-cook-event.{block-cook-event};
+    use block-explode-event.{block-explode-event};
+    use block-form-event.{block-form-event};
+    use block-from-to-event.{block-from-to-event};
+    use block-grow-event.{block-grow-event};
+    use block-piston-extend-event.{block-piston-extend-event};
+    use block-piston-retract-event.{block-piston-retract-event};
+    use leaves-decay-event.{leaves-decay-event};
+    use chunk-load-event.{chunk-load-event};
+    use chunk-unload-event.{chunk-unload-event};
+    use weather-change-event.{weather-change-event};
+    use thunder-change-event.{thunder-change-event};
+    use actor-death-event.{actor-death-event};
+    use actor-explode-event.{actor-explode-event};
+    use actor-knockback-event.{actor-knockback-event};
+    use actor-remove-event.{actor-remove-event};
+    use actor-spawn-event.{actor-spawn-event};
+    use actor-teleport-event.{actor-teleport-event};
+    use player-death-event.{player-death-event};
+    use broadcast-message-event.{broadcast-message-event};
+    use server-list-ping-event.{server-list-ping-event};
+    use plugin-enable-event.{plugin-enable-event};
+    use plugin-disable-event.{plugin-disable-event};
+    use server-load-event.{server-load-event};
+    use packet-send-event.{packet-send-event};
+    use packet-receive-event.{packet-receive-event};
+    use map-initialize-event.{map-initialize-event};
+    use script-message-event.{script-message-event};
+
+    variant event {
+        player-join(borrow<player-join-event>),
+        player-quit(borrow<player-quit-event>),
+        player-chat(borrow<player-chat-event>),
+        player-kick(borrow<player-kick-event>),
+        player-command(borrow<player-command-event>),
+        player-game-mode-change(borrow<player-game-mode-change-event>),
+        player-teleport(borrow<player-teleport-event>),
+        player-drop-item(borrow<player-drop-item-event>),
+        block-break(borrow<block-break-event>),
+        block-place(borrow<block-place-event>),
+        actor-damage(borrow<actor-damage-event>),
+        server-command(borrow<server-command-event>),
+        player-bed-enter(borrow<player-bed-enter-event>),
+        player-bed-leave(borrow<player-bed-leave-event>),
+        player-dimension-change(borrow<player-dimension-change-event>),
+        player-emote(borrow<player-emote-event>),
+        player-interact(borrow<player-interact-event>),
+        player-interact-actor(borrow<player-interact-actor-event>),
+        player-item-consume(borrow<player-item-consume-event>),
+        player-item-held(borrow<player-item-held-event>),
+        player-jump(borrow<player-jump-event>),
+        player-login(borrow<player-login-event>),
+        player-move(borrow<player-move-event>),
+        player-pickup-item(borrow<player-pickup-item-event>),
+        player-portal(borrow<player-portal-event>),
+        player-respawn(borrow<player-respawn-event>),
+        player-skin-change(borrow<player-skin-change-event>),
+        block-cook(borrow<block-cook-event>),
+        block-explode(borrow<block-explode-event>),
+        block-form(borrow<block-form-event>),
+        block-from-to(borrow<block-from-to-event>),
+        block-grow(borrow<block-grow-event>),
+        block-piston-extend(borrow<block-piston-extend-event>),
+        block-piston-retract(borrow<block-piston-retract-event>),
+        leaves-decay(borrow<leaves-decay-event>),
+        chunk-load(borrow<chunk-load-event>),
+        chunk-unload(borrow<chunk-unload-event>),
+        weather-change(borrow<weather-change-event>),
+        thunder-change(borrow<thunder-change-event>),
+        actor-death(borrow<actor-death-event>),
+        actor-explode(borrow<actor-explode-event>),
+        actor-knockback(borrow<actor-knockback-event>),
+        actor-remove(borrow<actor-remove-event>),
+        actor-spawn(borrow<actor-spawn-event>),
+        actor-teleport(borrow<actor-teleport-event>),
+        player-death(borrow<player-death-event>),
+        broadcast-message(borrow<broadcast-message-event>),
+        server-list-ping(borrow<server-list-ping-event>),
+        plugin-enable(borrow<plugin-enable-event>),
+        plugin-disable(borrow<plugin-disable-event>),
+        server-load(borrow<server-load-event>),
+        packet-send(borrow<packet-send-event>),
+        packet-receive(borrow<packet-receive-event>),
+        map-initialize(borrow<map-initialize-event>),
+        script-message(borrow<script-message-event>),
+    }
+
+    on-event: func(event: event) -> result<_, string>;
+}

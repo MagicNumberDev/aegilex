@@ -1,0 +1,32 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/map/map_view.h
+interface map-view {
+    use types.{host-error};
+
+    type map-id = s64;
+
+    enum map-scale {
+        closest,
+        close,
+        normal,
+        far,
+        farthest,
+    }
+
+    exists: func(id: map-id) -> result<bool, host-error>;
+    create: func(dimension: string) -> result<map-id, host-error>;
+    get-scale: func(id: map-id) -> result<map-scale, host-error>;
+    set-scale: func(id: map-id, scale: map-scale) -> result<_, host-error>;
+    get-center-x: func(id: map-id) -> result<s32, host-error>;
+    set-center-x: func(id: map-id, x: s32) -> result<_, host-error>;
+    get-center-z: func(id: map-id) -> result<s32, host-error>;
+    set-center-z: func(id: map-id, z: s32) -> result<_, host-error>;
+    get-dimension: func(id: map-id) -> result<string, host-error>;
+    set-dimension: func(id: map-id, dimension: string) -> result<_, host-error>;
+    is-virtual: func(id: map-id) -> result<bool, host-error>;
+    is-unlimited-tracking: func(id: map-id) -> result<bool, host-error>;
+    set-unlimited-tracking: func(id: map-id, unlimited: bool) -> result<_, host-error>;
+    is-locked: func(id: map-id) -> result<bool, host-error>;
+    set-locked: func(id: map-id, locked: bool) -> result<_, host-error>;
+}

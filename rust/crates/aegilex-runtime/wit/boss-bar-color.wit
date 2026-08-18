@@ -1,0 +1,15 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/boss/bar_color.h
+interface bar-color {
+    enum boss-bar-color {
+        pink,
+        blue,
+        red,
+        green,
+        yellow,
+        purple,
+        rebecca-purple,
+        white,
+    }
+}

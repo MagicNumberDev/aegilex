@@ -1,0 +1,16 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/scheduler/scheduler.h
+interface scheduler {
+    use task.{task};
+    use types.{host-error, task-id, tick-count};
+
+    schedule-now: func() -> result<task-id, host-error>;
+    schedule-after: func(delay-ticks: tick-count) -> result<task-id, host-error>;
+    schedule-every: func(initial-delay-ticks: tick-count, period-ticks: tick-count) -> result<task-id, host-error>;
+    cancel: func(task-id: task-id) -> result<_, host-error>;
+    get-task: func(task-id: task-id) -> result<task, host-error>;
+    task-is-running: func(task-id: task-id) -> result<bool, host-error>;
+    task-is-queued: func(task-id: task-id) -> result<bool, host-error>;
+    task-list-pending: func() -> result<list<task>, host-error>;
+}

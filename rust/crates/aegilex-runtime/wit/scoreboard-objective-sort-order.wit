@@ -1,0 +1,9 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/scoreboard/objective_sort_order.h
+interface objective-sort-order {
+    enum objective-sort-order {
+        ascending,
+        descending,
+    }
+}

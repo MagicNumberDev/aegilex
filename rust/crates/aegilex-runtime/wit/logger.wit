@@ -1,0 +1,27 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/logger.h
+interface logger {
+    use types.{host-error};
+
+    enum log-level {
+        trace,
+        debug,
+        info,
+        warning,
+        error,
+        critical,
+        off,
+    }
+
+    // A logger is a plugin-owned view of the server logger.
+    resource logger {
+        log: func(level: log-level, message: string) -> result<_, host-error>;
+        get-name: func() -> result<string, host-error>;
+        get-level: func() -> result<log-level, host-error>;
+        set-level: func(level: log-level) -> result<_, host-error>;
+        is-enabled-for: func(level: log-level) -> result<bool, host-error>;
+    }
+
+    get-logger: func() -> result<logger, host-error>;
+}

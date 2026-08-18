@@ -1,0 +1,25 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/block/block_state.h
+interface block-state {
+    use block.{block};
+    use block-data.{block-data};
+    use location.{location};
+    use types.{host-error};
+
+    resource block-state {
+        get-block: func() -> result<block, host-error>;
+        get-type: func() -> result<string, host-error>;
+        set-type: func(type-id: string) -> result<_, host-error>;
+        get-data: func() -> result<block-data, host-error>;
+        set-data: func(data: borrow<block-data>) -> result<_, host-error>;
+        get-x: func() -> result<s32, host-error>;
+        get-y: func() -> result<s32, host-error>;
+        get-z: func() -> result<s32, host-error>;
+        get-location: func() -> result<location, host-error>;
+        update: func(force: option<bool>, apply-physics: option<bool>) -> result<bool, host-error>;
+    }
+
+    // Block::captureState creates this resource without introducing a WIT import cycle.
+    capture: func(block: borrow<block>) -> result<block-state, host-error>;
+}

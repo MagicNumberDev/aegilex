@@ -1,0 +1,46 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/inventory/inventory.h
+interface inventory {
+    use item-stack.{item-stack};
+    use types.{host-error};
+
+    resource inventory {
+        get-size: func() -> result<s32, host-error>;
+        get-item: func(index: s32) -> result<option<item-stack>, host-error>;
+        set-item: func(index: s32, item: option<borrow<item-stack>>) -> result<_, host-error>;
+        get-contents: func() -> result<list<inventory-item>, host-error>;
+        set-contents: func(items: list<option<borrow<item-stack>>>) -> result<_, host-error>;
+        clear: func() -> result<_, host-error>;
+        clear-index: func(index: s32) -> result<_, host-error>;
+        get-max-stack-size: func() -> result<s32, host-error>;
+        add-item: func(items: list<borrow<item-stack>>) -> result<list<item-stack-result>, host-error>;
+        remove-item: func(items: list<borrow<item-stack>>) -> result<list<item-stack-result>, host-error>;
+        contains: func(request: item-request) -> result<bool, host-error>;
+        list-matching: func(request: item-request) -> result<list<item-stack-result>, host-error>;
+        first-slot: func(request: item-request) -> result<option<u32>, host-error>;
+        first-empty: func() -> result<option<u32>, host-error>;
+        is-empty: func() -> result<bool, host-error>;
+        remove-matching: func(request: item-request) -> result<_, host-error>;
+    }
+
+    record inventory-item {
+        index: s32,
+        item: option<item-stack>,
+    }
+
+    record item-stack-result {
+        slot: s32,
+        item: item-stack,
+    }
+
+    variant item-matcher {
+        type-id(string),
+        stack(borrow<item-stack>),
+    }
+
+    record item-request {
+        matcher: item-matcher,
+        amount: option<s32>,
+    }
+}

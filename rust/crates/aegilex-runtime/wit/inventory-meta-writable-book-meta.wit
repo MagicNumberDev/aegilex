@@ -1,0 +1,20 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/inventory/meta/writable_book_meta.h
+interface writable-book-meta {
+    use item-meta.{item-meta};
+    use types.{host-error};
+
+    resource writable-book-meta {
+        has-pages: func() -> result<bool, host-error>;
+        get-page: func(page: s32) -> result<string, host-error>;
+        set-page: func(page: s32, data: string) -> result<_, host-error>;
+        get-pages: func() -> result<list<string>, host-error>;
+        set-pages: func(pages: list<string>) -> result<_, host-error>;
+        add-pages: func(pages: list<string>) -> result<_, host-error>;
+        get-page-count: func() -> result<s32, host-error>;
+    }
+
+    from-item-meta: func(meta: borrow<item-meta>) -> result<option<writable-book-meta>, host-error>;
+    as-item-meta: func(meta: borrow<writable-book-meta>) -> result<item-meta, host-error>;
+}

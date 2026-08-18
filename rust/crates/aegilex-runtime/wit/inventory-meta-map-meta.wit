@@ -1,0 +1,18 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/inventory/meta/map_meta.h
+interface map-meta {
+    use item-meta.{item-meta};
+    use map-view.{map-id};
+    use types.{host-error};
+
+    resource map-meta {
+        has-map-id: func() -> result<bool, host-error>;
+        get-map-id: func() -> result<map-id, host-error>;
+        set-map-id: func(id: map-id) -> result<_, host-error>;
+        has-map-view: func() -> result<bool, host-error>;
+    }
+
+    from-item-meta: func(meta: borrow<item-meta>) -> result<option<map-meta>, host-error>;
+    as-item-meta: func(meta: borrow<map-meta>) -> result<item-meta, host-error>;
+}

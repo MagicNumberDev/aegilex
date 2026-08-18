@@ -1,0 +1,24 @@
+[package]
+name = "aegilex-runtime"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+crate-type = ["staticlib", "rlib"]
+
+[dependencies]
+anyhow = "1.0"
+cxx = "1.0"
+toml = "0.8.23"
+wasmtime = { version = "30.0.2", default-features = false, features = ["cranelift", "runtime"] }
+wasmtime-wasi = { version = "30.0.2", default-features = false, features = ["preview1"] }
+
+[build-dependencies]
+aegilex-core-bindgen = { path = "../aegilex-core-bindgen" }
+cxx-build = "1.0"
+wit-parser = "0.224.1"
+
+[lints]
+workspace = true

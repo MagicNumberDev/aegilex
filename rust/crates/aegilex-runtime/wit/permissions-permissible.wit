@@ -1,0 +1,24 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/permissions/permissible.h
+interface permissible {
+    use command-sender.{command-sender};
+    use permission-attachment.{permission-attachment};
+    use permission-level.{permission-level};
+    use types.{host-error};
+
+    record effective-permission { name: string, value: bool, attachment: option<permission-attachment> }
+
+    resource permissible {
+        get-permission-level: func() -> result<permission-level, host-error>;
+        has-permission: func(permission: string) -> result<bool, host-error>;
+        is-permission-set: func(permission: string) -> result<bool, host-error>;
+        recalculate-permissions: func() -> result<_, host-error>;
+        get-command-sender: func() -> result<option<command-sender>, host-error>;
+        attach: func(name: string, value: bool) -> result<permission-attachment, host-error>;
+        attach-empty: func() -> result<permission-attachment, host-error>;
+        list-effective: func() -> result<list<effective-permission>, host-error>;
+    }
+
+    get: func(sender: borrow<command-sender>) -> result<permissible, host-error>;
+}

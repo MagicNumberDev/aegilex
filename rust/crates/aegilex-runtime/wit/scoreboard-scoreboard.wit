@@ -1,0 +1,33 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/scoreboard/scoreboard.h
+interface scoreboard {
+    use criteria.{criteria};
+    use display-slot.{display-slot};
+    use objective.{objective};
+    use player.{player};
+    use render-type.{render-type};
+    use score.{score};
+    use score-entry.{score-entry};
+    use types.{host-error};
+
+    resource scoreboard {
+        get-objective: func(name: string) -> result<option<objective>, host-error>;
+        create-objective: func(name: string, criteria: criteria,
+                               display-name: string,
+                               render-type: option<render-type>) -> result<objective, host-error>;
+        remove-objective: func(name: string) -> result<_, host-error>;
+        get-objective-by-slot: func(slot: display-slot) -> result<option<objective>, host-error>;
+        list-objectives: func() -> result<list<objective>, host-error>;
+        list-objectives-by-criteria: func(criteria-name: string) -> result<list<objective>, host-error>;
+        clear-slot: func(slot: display-slot) -> result<_, host-error>;
+        reset-scores: func(entry: borrow<score-entry>) -> result<_, host-error>;
+        get-scores: func(entry: borrow<score-entry>) -> result<list<score>, host-error>;
+        list-entries: func() -> result<list<score-entry>, host-error>;
+    }
+
+    get-primary: func() -> result<option<scoreboard>, host-error>;
+    create: func() -> result<scoreboard, host-error>;
+    get-player-scoreboard: func(player: borrow<player>) -> result<scoreboard, host-error>;
+    set-player-scoreboard: func(player: borrow<player>, scoreboard: borrow<scoreboard>) -> result<_, host-error>;
+}

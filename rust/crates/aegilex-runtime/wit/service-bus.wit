@@ -1,0 +1,59 @@
+package aegilex:endstone@0.1.0;
+
+// Aegilex service-bus protocol over endstone/plugin/service*.h.
+// This interface is imported by world plugin; it does not expose native ServiceManager objects.
+interface service-bus {
+    use service-priority.{service-priority};
+    use types.{host-error, tick-count};
+
+    type service-id = u64;
+    type service-call-id = u64;
+
+    record service-spec {
+        name: string,
+        version: string,
+        methods: list<string>,
+        priority: service-priority,
+    }
+
+    record service-provider-info {
+        id: service-id,
+        spec: service-spec,
+    }
+    record service-request {
+        call-id: service-call-id,
+        provider-id: service-id,
+        method: string,
+        payload: list<u8>,
+        deadline: tick-count,
+    }
+
+    variant service-response {
+        success(list<u8>),
+        rejected(string),
+    }
+
+    enum service-call-status {
+        pending,
+        completed,
+        rejected,
+        failed,
+        cancelled,
+        expired,
+    }
+
+    resource service-provider {
+        get-spec: func() -> result<service-provider-info, host-error>;
+        unpublish: func() -> result<_, host-error>;
+    }
+
+    resource service-call {
+        get-status: func() -> result<service-call-status, host-error>;
+        take-response: func() -> result<option<service-response>, host-error>;
+        cancel: func() -> result<_, host-error>;
+    }
+
+    publish: func(spec: service-spec) -> result<service-provider, host-error>;
+    list-providers: func(name: string) -> result<list<service-provider-info>, host-error>;
+    call: func(provider-id: service-id, method: string, payload: list<u8>, timeout: tick-count) -> result<service-call, host-error>;
+}

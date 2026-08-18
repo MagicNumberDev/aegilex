@@ -1,0 +1,21 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/form/message_form.h
+// Copied message-form protocol imported by world plugin.
+interface message-form {
+    use form.{form};
+    use message.{message};
+
+    record message-form-spec {
+        title: message,
+        content: message,
+        button1: message,
+        button2: message,
+    }
+
+    enum message-response {
+        button1,
+        button2,
+    }
+
+}

@@ -1,0 +1,8 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/weather/thunder_change_event.h
+interface thunder-change-event {
+    use types.{host-error};
+
+    resource thunder-change-event { get-to-thunder: func() -> result<bool, host-error>; is-cancelled: func() -> result<bool, host-error>; set-cancelled: func(cancelled: bool) -> result<_, host-error>; }
+}

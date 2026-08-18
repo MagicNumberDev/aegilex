@@ -1,0 +1,9 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/player/player_item_held_event.h
+interface player-item-held-event {
+    use player.{player};
+    use types.{host-error};
+
+    resource player-item-held-event { get-player: func() -> result<player, host-error>; get-previous-slot: func() -> result<s32, host-error>; get-new-slot: func() -> result<s32, host-error>; is-cancelled: func() -> result<bool, host-error>; set-cancelled: func(cancelled: bool) -> result<_, host-error>; }
+}

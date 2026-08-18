@@ -1,0 +1,24 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/level/level.h
+interface level {
+    use actor.{actor};
+    use dimension.{dimension};
+    use types.{host-error};
+
+    type seed = s64;
+
+    record level {
+        name: string,
+        seed: seed,
+        time: s32,
+        dimension-count: u32,
+    }
+
+    get-level: func() -> result<level, host-error>;
+    get-time: func() -> result<s32, host-error>;
+    set-time: func(time: s32) -> result<_, host-error>;
+    list-dimensions: func() -> result<list<dimension>, host-error>;
+    find-dimension: func(name: string) -> result<option<dimension>, host-error>;
+    list-actors: func(dimension: option<string>) -> result<list<actor>, host-error>;
+}

@@ -1,0 +1,9 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/block/block_grow_event.h
+interface block-grow-event {
+    use block.{block};
+    use types.{host-error};
+
+    resource block-grow-event { get-block: func() -> result<block, host-error>; is-cancelled: func() -> result<bool, host-error>; set-cancelled: func(cancelled: bool) -> result<_, host-error>; }
+}

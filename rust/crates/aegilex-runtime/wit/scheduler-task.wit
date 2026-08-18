@@ -1,0 +1,8 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/scheduler/task.h
+interface task {
+    use types.{task-id};
+
+    record task { task-id: task-id, owner: string, is-sync: bool, is-cancelled: bool }
+}

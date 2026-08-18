@@ -1,0 +1,16 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/permissions/permission_attachment.h
+interface permission-attachment {
+    use types.{host-error};
+
+    record permission-child { name: string, value: bool }
+
+    resource permission-attachment {
+        detach: func() -> result<_, host-error>;
+        set: func(permission: string, value: bool) -> result<_, host-error>;
+        unset: func(permission: string) -> result<_, host-error>;
+        list-permissions: func() -> result<list<permission-child>, host-error>;
+        get-value: func(permission: string) -> result<bool, host-error>;
+    }
+}

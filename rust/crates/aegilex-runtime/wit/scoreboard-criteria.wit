@@ -1,0 +1,12 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/scoreboard/criteria.h
+interface criteria {
+    use render-type.{render-type};
+
+    record criteria {
+        name: string,
+        read-only: bool,
+        default-render-type: render-type,
+    }
+}

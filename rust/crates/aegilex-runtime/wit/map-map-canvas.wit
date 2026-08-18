@@ -1,0 +1,36 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/map/map_canvas.h
+// Copied renderer command buffer imported by world plugin.
+interface map-canvas {
+    use map-cursor.{map-cursor};
+
+    record map-pixel {
+        x: u8,
+        y: u8,
+        argb: u32,
+    }
+
+    record map-rect {
+        x: u8,
+        y: u8,
+        width: u8,
+        height: u8,
+        argb: u32,
+    }
+
+    record map-image-argb {
+        x: u8,
+        y: u8,
+        width: u8,
+        height: u8,
+        pixels: list<u32>,
+    }
+
+    variant map-draw-command {
+        set-pixel(map-pixel),
+        fill-rect(map-rect),
+        draw-image(map-image-argb),
+        set-cursors(list<map-cursor>),
+    }
+}

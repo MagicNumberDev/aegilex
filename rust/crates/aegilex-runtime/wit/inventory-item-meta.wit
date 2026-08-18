@@ -1,0 +1,39 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/inventory/meta/item_meta.h
+interface item-meta {
+    use types.{host-error};
+
+    enum item-meta-type { item, book, crossbow, map-value, writable-book }
+
+    record enchantment {
+        type-id: string,
+        level: s32,
+    }
+
+    resource item-meta {
+        get-type: func() -> result<item-meta-type, host-error>;
+        has-display-name: func() -> result<bool, host-error>;
+        get-display-name: func() -> result<string, host-error>;
+        set-display-name: func(name: option<string>) -> result<_, host-error>;
+        has-lore: func() -> result<bool, host-error>;
+        get-lore: func() -> result<list<string>, host-error>;
+        set-lore: func(lore: option<list<string>>) -> result<_, host-error>;
+        has-enchants: func() -> result<bool, host-error>;
+        has-enchant: func(type-id: string) -> result<bool, host-error>;
+        get-enchant-level: func(type-id: string) -> result<s32, host-error>;
+        get-enchants: func() -> result<list<enchantment>, host-error>;
+        add-enchant: func(type-id: string, level: s32, force: bool) -> result<bool, host-error>;
+        remove-enchant: func(type-id: string) -> result<bool, host-error>;
+        remove-enchants: func() -> result<_, host-error>;
+        is-unbreakable: func() -> result<bool, host-error>;
+        set-unbreakable: func(unbreakable: bool) -> result<_, host-error>;
+        has-damage: func() -> result<bool, host-error>;
+        get-damage: func() -> result<s32, host-error>;
+        set-damage: func(damage: s32) -> result<_, host-error>;
+        has-repair-cost: func() -> result<bool, host-error>;
+        get-repair-cost: func() -> result<s32, host-error>;
+        set-repair-cost: func(cost: s32) -> result<_, host-error>;
+        clone: func() -> result<item-meta, host-error>;
+    }
+}

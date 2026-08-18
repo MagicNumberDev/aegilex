@@ -1,0 +1,12 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/server/map_initialize_event.h
+// Callback-scoped map initialization resource imported by world plugin.
+interface map-initialize-event {
+    use map-view.{map-id};
+    use types.{host-error};
+
+    resource map-initialize-event {
+        get-map-id: func() -> result<map-id, host-error>;
+    }
+}

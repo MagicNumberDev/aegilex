@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/player/player_portal_event.h
+interface player-portal-event {
+    use location.{location};
+    use player.{player};
+    use types.{host-error};
+
+    resource player-portal-event { get-player: func() -> result<player, host-error>; get-from: func() -> result<location, host-error>; set-from: func(location: location) -> result<_, host-error>; get-to: func() -> result<location, host-error>; set-to: func(location: location) -> result<_, host-error>; is-cancelled: func() -> result<bool, host-error>; set-cancelled: func(cancelled: bool) -> result<_, host-error>; }
+}

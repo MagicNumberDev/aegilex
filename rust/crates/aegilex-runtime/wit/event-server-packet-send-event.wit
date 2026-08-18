@@ -1,0 +1,22 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/server/packet_send_event.h
+// Callback-scoped packet resource imported by world plugin.
+interface packet-send-event {
+    use packet.{packet-direction};
+    use player.{player};
+    use socket-address.{socket-address};
+    use types.{host-error};
+
+    resource packet-send-event {
+        get-direction: func() -> result<packet-direction, host-error>;
+        get-packet-id: func() -> result<s32, host-error>;
+        get-payload: func() -> result<list<u8>, host-error>;
+        set-payload: func(payload: list<u8>) -> result<_, host-error>;
+        get-player: func() -> result<option<player>, host-error>;
+        get-address: func() -> result<socket-address, host-error>;
+        get-sub-client-id: func() -> result<u8, host-error>;
+        is-cancelled: func() -> result<bool, host-error>;
+        set-cancelled: func(cancelled: bool) -> result<_, host-error>;
+    }
+}

@@ -1,0 +1,1 @@
+capabilities = ["logger.get-logger", "logger.logger.log", "actor.player.get-name", "player-join-event.player-join-event.get-player"]

@@ -1,0 +1,14 @@
+[package]
+name = "aegilex-full-test-component"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wit-bindgen = "0.60.0"
+parking_lot = "0.12"
+
+[workspace]

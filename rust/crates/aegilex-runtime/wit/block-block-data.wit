@@ -1,0 +1,23 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/block/block_data.h
+interface block-data {
+    use types.{host-error};
+
+    variant block-state-value {
+        boolean(bool),
+        text(string),
+        integer(s32),
+    }
+
+    record block-state-pair {
+        key: string,
+        value: block-state-value,
+    }
+
+    resource block-data {
+        get-type: func() -> result<string, host-error>;
+        get-block-states: func() -> result<list<block-state-pair>, host-error>;
+        get-runtime-id: func() -> result<u32, host-error>;
+    }
+}

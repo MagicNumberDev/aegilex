@@ -1,0 +1,16 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/map/map_renderer.h
+// Renderer resource protocol imported by world plugin.
+interface map-renderer {
+    use map-view.{map-id};
+    use types.{host-error};
+
+    resource map-renderer {
+        get-map-id: func() -> result<map-id, host-error>;
+        is-contextual: func() -> result<bool, host-error>;
+        unregister: func() -> result<_, host-error>;
+    }
+
+    register: func(map-id: map-id, contextual: bool) -> result<map-renderer, host-error>;
+}

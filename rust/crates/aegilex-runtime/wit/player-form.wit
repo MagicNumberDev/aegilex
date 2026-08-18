@@ -1,0 +1,21 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/player.h
+// Copied form lifecycle protocol imported by world plugin.
+interface player-form {
+    use action-form.{action-form-spec};
+    use form.{form};
+    use message-form.{message-form-spec};
+    use modal-form.{modal-form-spec};
+    use player.{player};
+    use types.{host-error};
+
+    variant form-spec {
+        action(action-form-spec),
+        message(message-form-spec),
+        modal(modal-form-spec),
+    }
+
+    show: func(player: borrow<player>, spec: form-spec) -> result<form, host-error>;
+    close-form: func(player: borrow<player>) -> result<_, host-error>;
+}

@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/actor/actor_knockback_event.h
+interface actor-knockback-event {
+    use actor.{actor};
+    use types.{host-error};
+    use vector.{vector};
+
+    resource actor-knockback-event { get-actor: func() -> result<actor, host-error>; get-source: func() -> result<option<actor>, host-error>; get-knockback: func() -> result<vector, host-error>; set-knockback: func(knockback: vector) -> result<_, host-error>; is-cancelled: func() -> result<bool, host-error>; set-cancelled: func(cancelled: bool) -> result<_, host-error>; }
+}

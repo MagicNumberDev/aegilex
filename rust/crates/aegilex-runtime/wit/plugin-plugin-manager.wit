@@ -1,0 +1,18 @@
+package aegilex:endstone@0.1.0;
+
+// Aegilex plugin-table protocol; it never exposes the native PluginManager.
+// Imported by world plugin and controlled by server-owned capabilities.
+interface plugin-manager {
+    use plugin-metadata.{metadata};
+    use types.{host-error};
+
+    record plugin-info {
+        metadata: metadata,
+        enabled: bool,
+    }
+
+    list-plugins: func() -> result<list<plugin-info>, host-error>;
+    get: func(name: string) -> result<option<plugin-info>, host-error>;
+    enable: func(name: string) -> result<plugin-info, host-error>;
+    disable: func(name: string) -> result<plugin-info, host-error>;
+}

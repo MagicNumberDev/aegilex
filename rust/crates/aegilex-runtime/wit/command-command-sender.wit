@@ -1,0 +1,13 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/command/command_sender.h
+interface command-sender {
+    use message.{message};
+    use types.{host-error};
+
+    resource command-sender {
+        get-name: func() -> result<string, host-error>;
+        send-message: func(message: message) -> result<_, host-error>;
+        send-error-message: func(message: message) -> result<_, host-error>;
+    }
+}

@@ -1,0 +1,30 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/form/action_form.h
+// Copied action-form protocol imported by world plugin.
+interface action-form {
+    use form.{form};
+    use form-button.{button};
+    use form-divider.{divider};
+    use form-header.{header};
+    use form-label.{label};
+    use message.{message};
+
+    variant action-control {
+        button(button),
+        label(label),
+        header(header),
+        divider(divider),
+    }
+
+    record action-form-spec {
+        title: message,
+        content: message,
+        controls: list<action-control>,
+    }
+
+    record action-response {
+        selected-index: u32,
+    }
+
+}

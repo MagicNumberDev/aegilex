@@ -1,0 +1,9 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/form/controls/divider.h
+// Copied form control value imported by world plugin.
+interface form-divider {
+    enum divider {
+        divider,
+    }
+}

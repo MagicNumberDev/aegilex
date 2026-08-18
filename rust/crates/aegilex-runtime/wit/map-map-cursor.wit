@@ -1,0 +1,41 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/map/map_cursor.h
+// Copied renderer value protocol imported by world plugin.
+interface map-cursor {
+    enum map-cursor-type {
+        player,
+        frame,
+        red-marker,
+        blue-marker,
+        target-x,
+        target-point,
+        player-off-map,
+        sign-marker,
+        pink-marker,
+        orange-marker,
+        yellow-marker,
+        cyan-marker,
+        green-point,
+        player-off-limits,
+        mansion,
+        monument,
+        village-desert,
+        village-plains,
+        village-savanna,
+        village-snowy,
+        village-taiga,
+        jungle-temple,
+        swamp-hut,
+        trial-chambers,
+    }
+
+    record map-cursor {
+        x: s8,
+        y: s8,
+        direction: u8,
+        cursor-type: map-cursor-type,
+        visible: bool,
+        caption: string,
+    }
+}

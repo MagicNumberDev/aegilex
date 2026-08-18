@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/player/player_game_mode_change_event.h
+interface player-game-mode-change-event {
+    use game-mode.{game-mode};
+    use player.{player};
+    use types.{host-error};
+
+    resource player-game-mode-change-event { get-player: func() -> result<player, host-error>; get-new-game-mode: func() -> result<game-mode, host-error>; is-cancelled: func() -> result<bool, host-error>; set-cancelled: func(cancelled: bool) -> result<_, host-error>; }
+}

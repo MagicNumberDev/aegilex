@@ -1,0 +1,6 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/util/uuid.h
+interface uuid {
+    type uuid = list<u8>;
+}

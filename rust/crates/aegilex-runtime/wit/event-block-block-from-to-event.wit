@@ -1,0 +1,9 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/block/block_from_to_event.h
+interface block-from-to-event {
+    use block.{block};
+    use types.{host-error};
+
+    resource block-from-to-event { get-block: func() -> result<block, host-error>; get-to-block: func() -> result<block, host-error>; is-cancelled: func() -> result<bool, host-error>; set-cancelled: func(cancelled: bool) -> result<_, host-error>; }
+}

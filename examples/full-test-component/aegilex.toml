@@ -1,0 +1,3 @@
+# Full test component is granted every known capability so every host API
+# smoke test runs against a live server.
+capabilities = ["*"]

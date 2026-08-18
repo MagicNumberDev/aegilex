@@ -1,0 +1,18 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/command/plugin_command.h
+interface plugin-command {
+    use types.{host-error};
+
+    record plugin-command-data {
+        name: string,
+        description: string,
+        aliases: list<string>,
+        usages: list<string>,
+        permissions: list<string>,
+    }
+
+    resource plugin-command {
+        get-data: func() -> result<plugin-command-data, host-error>;
+    }
+}

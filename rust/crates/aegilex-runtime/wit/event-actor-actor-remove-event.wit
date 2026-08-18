@@ -1,0 +1,9 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/actor/actor_remove_event.h
+interface actor-remove-event {
+    use actor.{actor};
+    use types.{host-error};
+
+    resource actor-remove-event { get-actor: func() -> result<actor, host-error>; }
+}

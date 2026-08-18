@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/player/player_bed_leave_event.h
+interface player-bed-leave-event {
+    use block.{block};
+    use player.{player};
+    use types.{host-error};
+
+    resource player-bed-leave-event { get-player: func() -> result<player, host-error>; get-bed: func() -> result<block, host-error>; }
+}

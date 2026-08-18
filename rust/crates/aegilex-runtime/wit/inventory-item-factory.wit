@@ -1,0 +1,12 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/inventory/item_factory.h
+interface item-factory {
+    use item-meta.{item-meta};
+    use types.{host-error};
+
+    create-for-type: func(type-id: string) -> result<item-meta, host-error>;
+    is-applicable: func(type-id: string, meta: borrow<item-meta>) -> result<bool, host-error>;
+    equals: func(a: option<borrow<item-meta>>, b: option<borrow<item-meta>>) -> result<bool, host-error>;
+    convert-for-type: func(type-id: string, meta: borrow<item-meta>) -> result<item-meta, host-error>;
+}

@@ -1,0 +1,133 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/actor/actor.h
+interface actor {
+    use game-mode.{game-mode};
+    use inventory.{inventory};
+    use item-stack.{item-stack};
+    use location.{location};
+    use map-view.{map-id};
+    use message.{message};
+    use player-inventory.{player-inventory};
+    use skin.{skin};
+    use socket-address.{socket-address};
+    use types.{actor-id, host-error};
+    use uuid.{uuid};
+    use vector.{vector};
+
+    type runtime-id = u64;
+
+    resource actor {
+        as-mob: func() -> result<option<mob>, host-error>;
+        as-item-actor: func() -> result<option<item-actor>, host-error>;
+        as-player: func() -> result<option<player>, host-error>;
+        get-runtime-id: func() -> result<runtime-id, host-error>;
+        get-id: func() -> result<actor-id, host-error>;
+        is-valid: func() -> result<bool, host-error>;
+        is-dead: func() -> result<bool, host-error>;
+        is-on-ground: func() -> result<bool, host-error>;
+        is-in-water: func() -> result<bool, host-error>;
+        is-in-lava: func() -> result<bool, host-error>;
+        get-actor-type: func() -> result<string, host-error>;
+        get-actor-name: func() -> result<string, host-error>;
+        get-actor-location: func() -> result<location, host-error>;
+        get-actor-dimension-location: func() -> result<location, host-error>;
+        get-actor-velocity: func() -> result<vector, host-error>;
+        get-actor-level-name: func() -> result<string, host-error>;
+        is-name-tag-visible: func() -> result<bool, host-error>;
+        is-name-tag-always-visible: func() -> result<bool, host-error>;
+        get-name-tag: func() -> result<string, host-error>;
+        get-score-tag: func() -> result<string, host-error>;
+        set-name-tag-visible: func(visible: bool) -> result<_, host-error>;
+        set-name-tag-always-visible: func(always-visible: bool) -> result<_, host-error>;
+        set-name-tag: func(name-tag: string) -> result<_, host-error>;
+        set-score-tag: func(score-tag: string) -> result<_, host-error>;
+        list-scoreboard-tags: func() -> result<list<string>, host-error>;
+        add-scoreboard-tag: func(tag: string) -> result<bool, host-error>;
+        remove-scoreboard-tag: func(tag: string) -> result<bool, host-error>;
+        set-rotation: func(yaw: f32, pitch: f32) -> result<_, host-error>;
+        teleport: func(location: location) -> result<bool, host-error>;
+        teleport-to-actor: func(target: borrow<actor>) -> result<bool, host-error>;
+        remove: func() -> result<_, host-error>;
+    }
+
+    // Co-located inherited resources avoid cyclic WIT interface dependencies.
+    resource mob {
+        as-actor: func() -> result<actor, host-error>;
+        is-gliding: func() -> result<bool, host-error>;
+        get-health: func() -> result<s32, host-error>;
+        get-max-health: func() -> result<s32, host-error>;
+        set-health: func(health: s32) -> result<_, host-error>;
+        set-max-health: func(health: s32) -> result<_, host-error>;
+    }
+
+    resource item-actor {
+        as-actor: func() -> result<actor, host-error>;
+        get-item-stack: func() -> result<item-stack, host-error>;
+        set-item-stack: func(item: borrow<item-stack>) -> result<_, host-error>;
+        get-pickup-delay: func() -> result<s32, host-error>;
+        set-pickup-delay: func(delay: s32) -> result<_, host-error>;
+        is-unlimited-lifetime: func() -> result<bool, host-error>;
+        set-unlimited-lifetime: func(unlimited: bool) -> result<_, host-error>;
+        get-thrower: func() -> result<option<actor-id>, host-error>;
+        set-thrower: func(thrower: option<actor-id>) -> result<_, host-error>;
+    }
+
+    resource player {
+        as-actor: func() -> result<actor, host-error>;
+        get-name: func() -> result<string, host-error>;
+        get-unique-id: func() -> result<uuid, host-error>;
+        get-xuid: func() -> result<string, host-error>;
+        is-operator: func() -> result<bool, host-error>;
+        set-operator: func(value: bool) -> result<_, host-error>;
+        get-ping: func() -> result<u32, host-error>;
+        get-locale: func() -> result<string, host-error>;
+        get-game-version: func() -> result<string, host-error>;
+        get-device-os: func() -> result<string, host-error>;
+        get-device-id: func() -> result<string, host-error>;
+        transfer: func(host: string, port: u16) -> result<_, host-error>;
+        kick: func(message: string) -> result<_, host-error>;
+        perform-command: func(command: string) -> result<bool, host-error>;
+        update-commands: func() -> result<_, host-error>;
+        is-sneaking: func() -> result<bool, host-error>;
+        set-sneaking: func(sneaking: bool) -> result<_, host-error>;
+        is-sprinting: func() -> result<bool, host-error>;
+        set-sprinting: func(sprinting: bool) -> result<_, host-error>;
+        get-exp-progress: func() -> result<f32, host-error>;
+        set-exp-progress: func(progress: f32) -> result<_, host-error>;
+        get-exp-level: func() -> result<s32, host-error>;
+        set-exp-level: func(level: s32) -> result<_, host-error>;
+        get-total-exp: func() -> result<s32, host-error>;
+        give-exp: func(amount: s32) -> result<_, host-error>;
+        give-exp-levels: func(amount: s32) -> result<_, host-error>;
+        get-allow-flight: func() -> result<bool, host-error>;
+        set-allow-flight: func(allow: bool) -> result<_, host-error>;
+        is-flying: func() -> result<bool, host-error>;
+        set-flying: func(flying: bool) -> result<_, host-error>;
+        get-fly-speed: func() -> result<f32, host-error>;
+        set-fly-speed: func(speed: f32) -> result<_, host-error>;
+        get-walk-speed: func() -> result<f32, host-error>;
+        set-walk-speed: func(speed: f32) -> result<_, host-error>;
+        send-message: func(message: message) -> result<_, host-error>;
+        send-popup: func(text: string) -> result<_, host-error>;
+        send-tip: func(text: string) -> result<_, host-error>;
+        send-toast: func(title: string, content: string) -> result<_, host-error>;
+        send-title: func(title: string, subtitle: string,
+                         fade-in: option<s32>, stay: option<s32>, fade-out: option<s32>) -> result<_, host-error>;
+        reset-title: func() -> result<_, host-error>;
+        play-sound: func(location: location, sound: string,
+                         volume: f32, pitch: f32) -> result<_, host-error>;
+        stop-sound: func(sound: string) -> result<_, host-error>;
+        stop-all-sounds: func() -> result<_, host-error>;
+        spawn-particle: func(name: string, x: f32, y: f32, z: f32,
+                             molang-json: option<string>) -> result<_, host-error>;
+        get-game-mode: func() -> result<game-mode, host-error>;
+        set-game-mode: func(mode: game-mode) -> result<_, host-error>;
+        get-skin: func() -> result<skin, host-error>;
+        send-map: func(map-id: map-id) -> result<_, host-error>;
+        get-address: func() -> result<socket-address, host-error>;
+        send-packet: func(packet-id: s32, payload: list<u8>) -> result<_, host-error>;
+        get-inventory: func() -> result<player-inventory, host-error>;
+        get-ender-chest: func() -> result<inventory, host-error>;
+    }
+}

@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/permissions/permission_level.h
+interface permission-level {
+    enum permission-level {
+        default,
+        operator,
+        console,
+    }
+}

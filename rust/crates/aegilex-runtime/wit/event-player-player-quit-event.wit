@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/player/player_quit_event.h
+interface player-quit-event {
+    use message.{message};
+    use player.{player};
+    use types.{host-error};
+
+    resource player-quit-event { get-player: func() -> result<player, host-error>; get-quit-message: func() -> result<option<message>, host-error>; set-quit-message: func(message: option<message>) -> result<_, host-error>; }
+}

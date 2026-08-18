@@ -1,0 +1,17 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/inventory/item_type.h
+interface item-type {
+    use item-stack.{item-stack};
+    use types.{host-error};
+
+    record item-type-data {
+        type-id: string,
+        translation-key: string,
+        max-stack-size: s32,
+        max-durability: s32,
+    }
+
+    get-item-type: func(type-id: string) -> result<item-type-data, host-error>;
+    create-item-stack: func(type-id: string, amount: option<s32>) -> result<item-stack, host-error>;
+}

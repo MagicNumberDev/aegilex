@@ -1,0 +1,8 @@
+package aegilex:endstone@0.1.0;
+
+// Aegilex fixed guest export for service providers.
+interface service-callbacks {
+    use service-bus.{service-request, service-response};
+
+    on-service-request: func(request: service-request) -> result<service-response, string>;
+}

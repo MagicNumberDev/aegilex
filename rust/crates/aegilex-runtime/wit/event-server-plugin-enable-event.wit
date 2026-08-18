@@ -1,0 +1,8 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/server/plugin_enable_event.h
+interface plugin-enable-event {
+    use types.{host-error};
+
+    resource plugin-enable-event { get-plugin-name: func() -> result<string, host-error>; }
+}

@@ -1,0 +1,15 @@
+package aegilex:endstone@0.1.0;
+
+interface types {
+    enum host-error {
+        denied,
+        invalid-input,
+        limit-exceeded,
+        not-found,
+        unavailable,
+    }
+
+    type task-id = u64;
+    type tick-count = u64;
+    type actor-id = s64;
+}

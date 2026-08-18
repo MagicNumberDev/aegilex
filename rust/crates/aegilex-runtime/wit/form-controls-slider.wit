@@ -1,0 +1,15 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/form/controls/slider.h
+// Copied form control value imported by world plugin.
+interface form-slider {
+    use message.{message};
+
+    record slider {
+        label: message,
+        min: f32,
+        max: f32,
+        step: f32,
+        default-value: option<f32>,
+    }
+}

@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/util/socket_address.h
+// Copied socket-address value imported by world plugin; policy controls its use.
+interface socket-address {
+    record socket-address {
+        hostname: string,
+        port: u32,
+    }
+}

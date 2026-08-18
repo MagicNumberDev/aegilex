@@ -1,0 +1,6 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/actor/item.h
+interface item-actor {
+    use actor.{item-actor};
+}

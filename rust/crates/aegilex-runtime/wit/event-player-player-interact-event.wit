@@ -1,0 +1,15 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/player/player_interact_event.h
+interface player-interact-event {
+    use block.{block};
+    use block-face.{block-face};
+    use item-stack.{item-stack-ref};
+    use player.{player};
+    use types.{host-error};
+    use vector.{vector};
+
+    resource player-interact-event { get-player: func() -> result<player, host-error>; get-action: func() -> result<interact-action, host-error>; get-item: func() -> result<option<item-stack-ref>, host-error>; get-block: func() -> result<option<block>, host-error>; get-block-face: func() -> result<block-face, host-error>; get-clicked-position: func() -> result<option<vector>, host-error>; is-cancelled: func() -> result<bool, host-error>; set-cancelled: func(cancelled: bool) -> result<_, host-error>; }
+
+    enum interact-action { left-click-block, right-click-block, left-click-air, right-click-air }
+}

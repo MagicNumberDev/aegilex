@@ -1,0 +1,13 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/form/controls/dropdown.h
+// Copied form control value imported by world plugin.
+interface form-dropdown {
+    use message.{message};
+
+    record dropdown {
+        label: message,
+        options: list<string>,
+        default-index: option<u32>,
+    }
+}

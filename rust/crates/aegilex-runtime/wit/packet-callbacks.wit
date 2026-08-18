@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Reserved packet callback export shape; packet events use `events.on-event`.
+interface packet-callbacks {
+    use packet-receive-event.{packet-receive-event};
+    use packet-send-event.{packet-send-event};
+
+    on-packet-receive: func(event: borrow<packet-receive-event>) -> result<_, string>;
+    on-packet-send: func(event: borrow<packet-send-event>) -> result<_, string>;
+}

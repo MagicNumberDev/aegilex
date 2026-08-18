@@ -1,0 +1,26 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/inventory/player_inventory.h
+interface player-inventory {
+    use inventory.{inventory};
+    use item-stack.{item-stack};
+    use types.{host-error};
+
+    resource player-inventory {
+        get-inventory: func() -> result<inventory, host-error>;
+        get-helmet: func() -> result<option<item-stack>, host-error>;
+        set-helmet: func(item: option<borrow<item-stack>>) -> result<_, host-error>;
+        get-chestplate: func() -> result<option<item-stack>, host-error>;
+        set-chestplate: func(item: option<borrow<item-stack>>) -> result<_, host-error>;
+        get-leggings: func() -> result<option<item-stack>, host-error>;
+        set-leggings: func(item: option<borrow<item-stack>>) -> result<_, host-error>;
+        get-boots: func() -> result<option<item-stack>, host-error>;
+        set-boots: func(item: option<borrow<item-stack>>) -> result<_, host-error>;
+        get-item-in-main-hand: func() -> result<option<item-stack>, host-error>;
+        set-item-in-main-hand: func(item: option<borrow<item-stack>>) -> result<_, host-error>;
+        get-item-in-off-hand: func() -> result<option<item-stack>, host-error>;
+        set-item-in-off-hand: func(item: option<borrow<item-stack>>) -> result<_, host-error>;
+        get-held-item-slot: func() -> result<s32, host-error>;
+        set-held-item-slot: func(slot: s32) -> result<_, host-error>;
+    }
+}

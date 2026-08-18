@@ -1,0 +1,19 @@
+package aegilex:endstone@0.1.0;
+
+// Aegilex fixed guest exports for the endstone/form/*.h protocol.
+interface form-callbacks {
+    use action-form.{action-response};
+    use form.{form};
+    use message-form.{message-response};
+    use modal-form.{modal-response};
+    use player.{player};
+
+    variant form-response {
+        action(action-response),
+        message(message-response),
+        modal(modal-response),
+    }
+
+    on-form-submit: func(form: borrow<form>, player: borrow<player>, response: form-response) -> result<_, string>;
+    on-form-close: func(form: borrow<form>, player: borrow<player>) -> result<_, string>;
+}

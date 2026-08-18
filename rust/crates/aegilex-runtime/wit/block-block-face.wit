@@ -1,0 +1,13 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/block/block_face.h
+interface block-face {
+    enum block-face {
+        down,
+        up,
+        north,
+        south,
+        west,
+        east,
+    }
+}

@@ -1,0 +1,33 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/boss/boss_bar.h
+interface boss-bar {
+    use bar-color.{boss-bar-color};
+    use bar-flag.{boss-bar-flag};
+    use bar-style.{boss-bar-style};
+    use player.{player};
+    use types.{host-error};
+
+    resource boss-bar {
+        get-title: func() -> result<string, host-error>;
+        set-title: func(title: string) -> result<_, host-error>;
+        get-color: func() -> result<boss-bar-color, host-error>;
+        set-color: func(color: boss-bar-color) -> result<_, host-error>;
+        get-style: func() -> result<boss-bar-style, host-error>;
+        set-style: func(style: boss-bar-style) -> result<_, host-error>;
+        has-flag: func(flag: boss-bar-flag) -> result<bool, host-error>;
+        add-flag: func(flag: boss-bar-flag) -> result<_, host-error>;
+        remove-flag: func(flag: boss-bar-flag) -> result<_, host-error>;
+        get-progress: func() -> result<f32, host-error>;
+        set-progress: func(progress: f32) -> result<_, host-error>;
+        is-visible: func() -> result<bool, host-error>;
+        set-visible: func(visible: bool) -> result<_, host-error>;
+        add-player: func(player: borrow<player>) -> result<_, host-error>;
+        remove-player: func(player: borrow<player>) -> result<_, host-error>;
+        remove-all-players: func() -> result<_, host-error>;
+        get-players: func() -> result<list<player>, host-error>;
+    }
+
+    create: func(title: string, color: boss-bar-color, style: boss-bar-style,
+                 flag-list: list<boss-bar-flag>) -> result<boss-bar, host-error>;
+}

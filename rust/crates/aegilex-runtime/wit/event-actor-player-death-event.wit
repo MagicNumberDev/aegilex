@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/actor/player_death_event.h
+interface player-death-event {
+    use message.{message};
+    use player.{player};
+    use types.{host-error};
+
+    resource player-death-event { get-player: func() -> result<player, host-error>; get-death-message: func() -> result<option<message>, host-error>; set-death-message: func(message: option<message>) -> result<_, host-error>; }
+}

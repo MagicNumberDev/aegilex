@@ -1,0 +1,12 @@
+package aegilex:endstone@0.1.0;
+
+// Aegilex fixed guest exports for endstone/map/map_renderer.h.
+interface map-renderer-callbacks {
+    use map-canvas.{map-draw-command};
+    use map-renderer.{map-renderer};
+    use map-view.{map-id};
+    use player.{player};
+
+    on-map-initialize: func(renderer: borrow<map-renderer>, map-id: map-id) -> result<_, string>;
+    on-map-render: func(renderer: borrow<map-renderer>, map-id: map-id, player: borrow<player>) -> result<list<map-draw-command>, string>;
+}

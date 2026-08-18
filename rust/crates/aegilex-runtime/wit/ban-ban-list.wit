@@ -1,0 +1,24 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/ban/ban_list.h
+interface ban-list {
+    use server.{timestamp-ms};
+    use types.{host-error};
+    use uuid.{uuid};
+
+    enum ban-list-kind { player, ip }
+    record ban-entry { target: string, uuid: option<uuid>, xuid: option<string>, reason: string, source: string, created-ms: timestamp-ms, expiration-ms: option<timestamp-ms> }
+
+    resource ban-list {
+        is-banned: func(target: string) -> result<bool, host-error>;
+        is-player-banned: func(target: string, uuid: option<uuid>, xuid: option<string>) -> result<bool, host-error>;
+        add-ban: func(target: string, reason: option<string>, expires-ms: option<timestamp-ms>, source: option<string>) -> result<ban-entry, host-error>;
+        add-player-ban: func(target: string, uuid: option<uuid>, xuid: option<string>, reason: option<string>, expires-ms: option<timestamp-ms>, source: option<string>) -> result<ban-entry, host-error>;
+        remove-ban: func(target: string) -> result<_, host-error>;
+        remove-player-ban: func(target: string, uuid: option<uuid>, xuid: option<string>) -> result<_, host-error>;
+        list-entries: func() -> result<list<ban-entry>, host-error>;
+        get-entry: func(target: string) -> result<option<ban-entry>, host-error>;
+    }
+
+    get: func(list-kind: ban-list-kind) -> result<ban-list, host-error>;
+}

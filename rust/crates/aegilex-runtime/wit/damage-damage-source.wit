@@ -1,0 +1,13 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/damage/damage_source.h
+interface damage-source {
+    use types.{actor-id};
+
+    record damage-source {
+        type-id: string,
+        actor-id: option<actor-id>,
+        damaging-actor-id: option<actor-id>,
+        indirect: bool,
+    }
+}

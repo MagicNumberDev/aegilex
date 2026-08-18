@@ -1,0 +1,9 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/identifier.h
+interface identifier {
+    record namespaced-id {
+        namespace: string,
+        key: string,
+    }
+}

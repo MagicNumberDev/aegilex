@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/player/player_join_event.h
+interface player-join-event {
+    use message.{message};
+    use player.{player};
+    use types.{host-error};
+
+    resource player-join-event { get-player: func() -> result<player, host-error>; get-join-message: func() -> result<option<message>, host-error>; set-join-message: func(message: option<message>) -> result<_, host-error>; }
+}

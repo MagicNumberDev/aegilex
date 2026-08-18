@@ -1,0 +1,13 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/skin.h
+interface skin {
+    use image.{image};
+
+    record skin {
+        id: string,
+        image: image,
+        cape-id: option<string>,
+        cape-image: option<image>,
+    }
+}

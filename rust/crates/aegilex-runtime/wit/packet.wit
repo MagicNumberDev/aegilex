@@ -1,0 +1,16 @@
+package aegilex:endstone@0.1.0;
+
+// Packet direction and mode values used by the packet event protocols.
+interface packet {
+    enum packet-direction {
+        receive,
+        send,
+    }
+
+    enum packet-mode {
+        observe,
+        cancel,
+        replace,
+        inject,
+    }
+}

@@ -1,0 +1,11 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/level/chunk.h
+interface chunk {
+    record chunk {
+        dimension: string,
+        x: s32,
+        z: s32,
+        level-name: string,
+    }
+}

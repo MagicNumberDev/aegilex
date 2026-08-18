@@ -1,0 +1,30 @@
+package aegilex:endstone@0.1.0;
+
+// Aegilex plugin-context protocol, combining the current guest plugin and
+// copied PluginDescription view without exposing native plugin references.
+interface plugin-context {
+    use plugin-command.{plugin-command};
+    use plugin-types.{load-order};
+    use permission-default.{permission-default};
+    use types.{host-error};
+    get-name: func() -> result<string, host-error>;
+    get-version: func() -> result<string, host-error>;
+    get-full-name: func() -> result<string, host-error>;
+    get-api-version: func() -> result<string, host-error>;
+    get-description: func() -> result<string, host-error>;
+    get-load-order: func() -> result<load-order, host-error>;
+    list-authors: func() -> result<list<string>, host-error>;
+    list-contributors: func() -> result<list<string>, host-error>;
+    get-website: func() -> result<string, host-error>;
+    get-prefix: func() -> result<string, host-error>;
+    list-provides: func() -> result<list<string>, host-error>;
+    list-depend: func() -> result<list<string>, host-error>;
+    list-soft-depend: func() -> result<list<string>, host-error>;
+    list-load-before: func() -> result<list<string>, host-error>;
+    get-default-permission: func() -> result<permission-default, host-error>;
+    list-commands: func() -> result<list<string>, host-error>;
+    is-enabled: func() -> result<bool, host-error>;
+    get-data-folder: func() -> result<string, host-error>;
+    list-loader-file-filters: func() -> result<list<string>, host-error>;
+    get-command: func(name: string) -> result<option<plugin-command>, host-error>;
+}

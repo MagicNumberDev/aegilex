@@ -1,0 +1,14 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/inventory/equipment_slot.h
+interface equipment-slot {
+    enum equipment-slot {
+        hand,
+        off-hand,
+        feet,
+        legs,
+        chest,
+        head,
+        body,
+    }
+}

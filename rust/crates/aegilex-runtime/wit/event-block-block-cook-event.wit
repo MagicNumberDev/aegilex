@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/block/block_cook_event.h
+interface block-cook-event {
+    use block.{block};
+    use item-stack.{item-stack, item-stack-ref};
+    use types.{host-error};
+
+    resource block-cook-event { get-block: func() -> result<block, host-error>; get-source: func() -> result<item-stack-ref, host-error>; get-result: func() -> result<item-stack-ref, host-error>; set-result: func(item: borrow<item-stack>) -> result<_, host-error>; is-cancelled: func() -> result<bool, host-error>; set-cancelled: func(cancelled: bool) -> result<_, host-error>; }
+}

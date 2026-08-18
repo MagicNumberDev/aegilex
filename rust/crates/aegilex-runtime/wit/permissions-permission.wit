@@ -1,0 +1,28 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/permissions/permission.h
+interface permission-definition {
+    use permission-attachment.{permission-child};
+    use permission-default.{permission-default};
+    use permission-level.{permission-level};
+    use types.{host-error};
+
+    resource permission-definition {
+        get-name: func() -> result<string, host-error>;
+        get-description: func() -> result<string, host-error>;
+        set-description: func(description: string) -> result<_, host-error>;
+        get-default: func() -> result<permission-default, host-error>;
+        set-default: func(default-value: permission-default) -> result<_, host-error>;
+        list-children: func() -> result<list<permission-child>, host-error>;
+        add-child: func(child-name: string, value: bool) -> result<_, host-error>;
+        remove-child: func(child-name: string) -> result<_, host-error>;
+        recalculate-defaults: func() -> result<_, host-error>;
+        recalculate-permissibles: func() -> result<_, host-error>;
+        add-parent: func(parent-name: string, value: bool) -> result<permission-definition, host-error>;
+    }
+
+    get: func(name: string) -> result<option<permission-definition>, host-error>;
+    add: func(name: string, description: option<string>, default-value: option<permission-default>, children: list<permission-child>) -> result<permission-definition, host-error>;
+    remove: func(name: string) -> result<_, host-error>;
+    list-defaults: func(level: permission-level) -> result<list<permission-definition>, host-error>;
+}

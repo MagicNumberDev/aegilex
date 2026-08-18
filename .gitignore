@@ -1,0 +1,52 @@
+# Rust
+target/
+**/*.rs.bk
+
+# CMake
+/CMakeFiles/
+/CMakeCache.txt
+/cmake_install.cmake
+/Makefile
+/cmake-build-*/
+/build/
+**/CMakeFiles/
+**/CMakeCache.txt
+**/compile_commands.json
+
+# C/C++
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.pdb
+*.ilk
+
+# Clangd
+/.clangd/
+
+# Generated WIT copies
+/examples/hello-component/wit/
+/examples/event-test-component/wit/
+/examples/full-test-component/wit/
+/tests/api_probe/wit/
+
+# Native caches
+/native/.cache/
+
+# IDE / editors
+.vscode/
+.idea/
+*.suo
+*.user
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

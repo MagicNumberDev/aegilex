@@ -1,0 +1,17 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/scoreboard/score_entry.h
+interface score-entry {
+    use actor.{actor, player};
+    use types.{host-error};
+
+    resource score-entry {
+        as-player: func() -> result<option<player>, host-error>;
+        as-actor: func() -> result<option<actor>, host-error>;
+        as-text: func() -> result<option<string>, host-error>;
+    }
+
+    from-text: func(text: string) -> result<score-entry, host-error>;
+    from-player: func(player: borrow<player>) -> result<score-entry, host-error>;
+    from-actor: func(actor: borrow<actor>) -> result<score-entry, host-error>;
+}

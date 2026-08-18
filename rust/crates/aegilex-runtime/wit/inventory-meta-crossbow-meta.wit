@@ -1,0 +1,18 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/inventory/meta/crossbow_meta.h
+interface crossbow-meta {
+    use item-meta.{item-meta};
+    use item-stack.{item-stack};
+    use types.{host-error};
+
+    resource crossbow-meta {
+        has-charged-projectiles: func() -> result<bool, host-error>;
+        get-charged-projectiles: func() -> result<list<item-stack>, host-error>;
+        set-charged-projectiles: func(projectiles: list<borrow<item-stack>>) -> result<_, host-error>;
+        add-charged-projectile: func(projectile: borrow<item-stack>) -> result<_, host-error>;
+    }
+
+    from-item-meta: func(meta: borrow<item-meta>) -> result<option<crossbow-meta>, host-error>;
+    as-item-meta: func(meta: borrow<crossbow-meta>) -> result<item-meta, host-error>;
+}

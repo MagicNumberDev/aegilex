@@ -1,0 +1,25 @@
+package aegilex:endstone@0.1.0;
+
+interface plugin-metadata {
+    use plugin-types.{command, load-order, plugin-permission};
+    use permission-default.{permission-default};
+
+    record metadata {
+        name: string,
+        version: string,
+        description: string,
+        load-order: load-order,
+        authors: list<string>,
+        contributors: list<string>,
+        website: string,
+        prefix: string,
+        provides: list<string>,
+        depend: list<string>,
+        soft-depend: list<string>,
+        load-before: list<string>,
+        default-permission: permission-default,
+        commands: list<command>,
+        permissions: list<plugin-permission>,
+        subscriptions: list<string>,
+    }
+}

@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/block/block_type.h
+interface block-type {
+    use block-data.{block-data};
+    use types.{host-error};
+
+    has-item-type: func(type-id: string) -> result<bool, host-error>;
+    create-block-data: func(type-id: string) -> result<block-data, host-error>;
+}

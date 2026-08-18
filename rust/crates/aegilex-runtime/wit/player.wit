@@ -1,0 +1,6 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/player.h
+interface player {
+    use actor.{player};
+}

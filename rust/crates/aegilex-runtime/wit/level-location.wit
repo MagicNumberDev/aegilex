@@ -1,0 +1,13 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/level/location.h
+interface location {
+    record location {
+        dimension: string,
+        x: f32,
+        y: f32,
+        z: f32,
+        pitch: f32,
+        yaw: f32,
+    }
+}

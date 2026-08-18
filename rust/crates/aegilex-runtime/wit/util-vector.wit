@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/util/vector.h
+interface vector {
+    record vector {
+        x: f32,
+        y: f32,
+        z: f32,
+    }
+}

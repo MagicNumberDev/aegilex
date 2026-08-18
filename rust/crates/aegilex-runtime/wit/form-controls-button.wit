@@ -1,0 +1,12 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/form/controls/button.h
+// Copied form control value imported by world plugin.
+interface form-button {
+    use message.{message};
+
+    record button {
+        text: message,
+        icon: option<string>,
+    }
+}

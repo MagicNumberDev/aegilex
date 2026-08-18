@@ -1,0 +1,13 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/offline_player.h
+interface offline-player {
+    use types.{host-error};
+    use uuid.{uuid};
+
+    // A durable copied player identity. It never retains an online Player pointer.
+    resource offline-player {
+        get-name: func() -> result<string, host-error>;
+        get-unique-id: func() -> result<uuid, host-error>;
+    }
+}

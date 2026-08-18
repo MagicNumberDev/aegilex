@@ -1,0 +1,8 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/chunk/chunk_load_event.h
+interface chunk-load-event {
+    use types.{host-error};
+
+    resource chunk-load-event { get-chunk-x: func() -> result<s32, host-error>; get-chunk-z: func() -> result<s32, host-error>; get-dimension: func() -> result<string, host-error>; }
+}

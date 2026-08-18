@@ -1,0 +1,11 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/game_mode.h
+interface game-mode {
+    enum game-mode {
+        survival,
+        creative,
+        adventure,
+        spectator,
+    }
+}

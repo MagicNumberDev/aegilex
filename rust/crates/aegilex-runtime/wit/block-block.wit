@@ -1,0 +1,21 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/block/block.h
+interface block {
+    use block-data.{block-data};
+    use location.{location};
+    use types.{host-error};
+
+    resource block {
+        get-type: func() -> result<string, host-error>;
+        set-type: func(type-id: string, apply-physics: option<bool>) -> result<_, host-error>;
+        get-x: func() -> result<s32, host-error>;
+        get-y: func() -> result<s32, host-error>;
+        get-z: func() -> result<s32, host-error>;
+        get-location: func() -> result<location, host-error>;
+        get-data: func() -> result<block-data, host-error>;
+        set-data: func(data: borrow<block-data>, apply-physics: option<bool>) -> result<_, host-error>;
+        get-relative: func(dx: s32, dy: s32, dz: s32) -> result<block, host-error>;
+        clone: func() -> result<block, host-error>;
+    }
+}

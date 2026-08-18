@@ -1,0 +1,10 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/event/player/player_drop_item_event.h
+interface player-drop-item-event {
+    use item-stack.{item-stack-ref};
+    use player.{player};
+    use types.{host-error};
+
+    resource player-drop-item-event { get-player: func() -> result<player, host-error>; get-item: func() -> result<item-stack-ref, host-error>; is-cancelled: func() -> result<bool, host-error>; set-cancelled: func(cancelled: bool) -> result<_, host-error>; }
+}

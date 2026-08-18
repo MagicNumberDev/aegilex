@@ -1,0 +1,35 @@
+package aegilex:endstone@0.1.0;
+
+// Endstone header: endstone/inventory/meta/book_meta.h
+interface book-meta {
+    use item-meta.{item-meta};
+    use types.{host-error};
+
+    enum book-generation {
+        original,
+        copy-of-original,
+        copy-of-copy,
+    }
+
+    resource book-meta {
+        has-pages: func() -> result<bool, host-error>;
+        get-page: func(page: s32) -> result<string, host-error>;
+        set-page: func(page: s32, data: string) -> result<_, host-error>;
+        get-pages: func() -> result<list<string>, host-error>;
+        set-pages: func(pages: list<string>) -> result<_, host-error>;
+        add-pages: func(pages: list<string>) -> result<_, host-error>;
+        get-page-count: func() -> result<s32, host-error>;
+        has-title: func() -> result<bool, host-error>;
+        get-title: func() -> result<string, host-error>;
+        set-title: func(title: option<string>) -> result<_, host-error>;
+        has-author: func() -> result<bool, host-error>;
+        get-author: func() -> result<string, host-error>;
+        set-author: func(author: option<string>) -> result<_, host-error>;
+        has-generation: func() -> result<bool, host-error>;
+        get-generation: func() -> result<option<book-generation>, host-error>;
+        set-generation: func(generation: option<book-generation>) -> result<_, host-error>;
+    }
+
+    from-item-meta: func(meta: borrow<item-meta>) -> result<option<book-meta>, host-error>;
+    as-item-meta: func(meta: borrow<book-meta>) -> result<item-meta, host-error>;
+}

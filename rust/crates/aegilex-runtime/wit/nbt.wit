@@ -1,0 +1,76 @@
+package aegilex:endstone@0.1.0;
+
+// Resource-safe value interop for endstone/nbt/{tag,value,array,list,compound,type}.h.
+interface nbt {
+    use types.{host-error};
+
+    enum tag-type {
+        end,
+        byte,
+        short,
+        int,
+        long,
+        float,
+        double,
+        byte-array,
+        string-value,
+        list-value,
+        compound,
+        int-array,
+    }
+
+    record compound-entry {
+        key: string,
+        value: borrow<tag>,
+    }
+
+    // A tag is a guest-owned recursive NBT snapshot. Container operations copy
+    // children so child resources never retain their parent.
+    resource tag {
+        get-type: func() -> result<tag-type, host-error>;
+        get-byte: func() -> result<u8, host-error>;
+        get-short: func() -> result<s16, host-error>;
+        get-int: func() -> result<s32, host-error>;
+        get-long: func() -> result<s64, host-error>;
+        get-float: func() -> result<f32, host-error>;
+        get-double: func() -> result<f64, host-error>;
+        get-byte-array: func() -> result<list<u8>, host-error>;
+        get-string: func() -> result<string, host-error>;
+        get-int-array: func() -> result<list<s32>, host-error>;
+        get-list-size: func() -> result<s32, host-error>;
+        get-list-entry: func(index: s32) -> result<tag, host-error>;
+        get-compound-keys: func() -> result<list<string>, host-error>;
+        get-compound: func(key: string) -> result<option<tag>, host-error>;
+
+        set-byte: func(value: u8) -> result<_, host-error>;
+        set-short: func(value: s16) -> result<_, host-error>;
+        set-int: func(value: s32) -> result<_, host-error>;
+        set-long: func(value: s64) -> result<_, host-error>;
+        set-float: func(value: f32) -> result<_, host-error>;
+        set-double: func(value: f64) -> result<_, host-error>;
+        set-byte-array: func(value: list<u8>) -> result<_, host-error>;
+        set-string: func(value: string) -> result<_, host-error>;
+        set-int-array: func(value: list<s32>) -> result<_, host-error>;
+        set-list: func(values: list<borrow<tag>>) -> result<_, host-error>;
+        list-set: func(index: s32, value: borrow<tag>) -> result<_, host-error>;
+        list-remove: func(index: s32) -> result<_, host-error>;
+        list-clear: func() -> result<_, host-error>;
+        set-compound: func(entries: list<compound-entry>) -> result<_, host-error>;
+        compound-set: func(key: string, value: borrow<tag>) -> result<_, host-error>;
+        compound-remove: func(key: string) -> result<bool, host-error>;
+        compound-clear: func() -> result<_, host-error>;
+    }
+
+    from-end: func() -> result<tag, host-error>;
+    from-byte: func(value: u8) -> result<tag, host-error>;
+    from-short: func(value: s16) -> result<tag, host-error>;
+    from-int: func(value: s32) -> result<tag, host-error>;
+    from-long: func(value: s64) -> result<tag, host-error>;
+    from-float: func(value: f32) -> result<tag, host-error>;
+    from-double: func(value: f64) -> result<tag, host-error>;
+    from-byte-array: func(value: list<u8>) -> result<tag, host-error>;
+    from-string: func(value: string) -> result<tag, host-error>;
+    from-int-array: func(value: list<s32>) -> result<tag, host-error>;
+    from-list: func(values: list<borrow<tag>>) -> result<tag, host-error>;
+    from-compound: func(entries: list<compound-entry>) -> result<tag, host-error>;
+}
