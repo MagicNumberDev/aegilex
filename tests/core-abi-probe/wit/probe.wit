@@ -9,6 +9,7 @@ interface probe {
     echo: func(input: echo-input) -> string;
     maybe: func(value: option<u32>) -> result<u32, string>;
     log: func(message: string);
+    list-echo: func(values: list<u32>) -> u32;
 }
 
 interface callbacks {
@@ -18,10 +19,18 @@ interface callbacks {
     }
 
     on-tick: func() -> result<_, string>;
+    tick-count: func() -> u32;
 }
 
 world probe-world {
     import probe;
     export callbacks;
     export entry: func() -> string;
+    export direct-u32: func(value: u32) -> u32;
+    export direct-i64: func(value: s64) -> s64;
+    export direct-f32: func() -> f32;
+    export direct-f64: func() -> f64;
+    export empty-list-values: func() -> list<string>;
+    export list-values: func() -> list<string>;
+    export exercise-list-import: func() -> u32;
 }

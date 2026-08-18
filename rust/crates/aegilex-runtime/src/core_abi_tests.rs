@@ -79,6 +79,13 @@ impl HostProbe for ProbeState {
         self.trace.push(format!("log({message})"));
         Ok(())
     }
+
+    fn list_echo(&mut self, values: Vec<u32>) -> Result<u32, String> {
+        self.trace.push(format!("list-echo({values:?})"));
+        values
+            .into_iter()
+            .try_fold(0u32, |sum, value| sum.checked_add(value).ok_or_else(|| "overflow".to_owned()))
+    }
 }
 
 fn new_probe_store(engine: &Engine) -> Store<ProbeState> {
@@ -151,6 +158,106 @@ fn generated_bindings_round_trip_values_through_core_abi() {
         ]
     );
     assert!(!store.as_context().data().nested);
+}
+
+#[test]
+fn generated_bindings_call_direct_scalars_and_lists() {
+    let engine = Engine::new(&Config::new()).expect("engine");
+    let module = load_probe_module(&engine);
+    let linker = build_probe_linker(&engine).expect("linker");
+    let mut store = new_probe_store(&engine);
+    let instance = linker
+        .instantiate(&mut store, &module)
+        .expect("instantiate");
+    let exports = core_host::CoreExports::new(&instance, &mut store).expect("core exports");
+
+    assert_eq!(
+        exports
+            .call_direct_u32(&instance, &mut store, 41)
+            .expect("direct u32"),
+        42
+    );
+    assert_eq!(
+        exports
+            .call_direct_i64(&instance, &mut store, 41)
+            .expect("direct i64"),
+        -41
+    );
+    assert_eq!(
+        exports
+            .call_direct_f32(&mut store)
+            .expect("direct f32")
+            .to_bits(),
+        0x4049_0fdb
+    );
+    assert_eq!(
+        exports
+            .call_direct_f64(&mut store)
+            .expect("direct f64")
+            .to_bits(),
+        0x4009_21fb_5444_2d18
+    );
+    assert_eq!(
+        exports
+            .call_empty_list_values(&instance, &mut store)
+            .expect("empty list"),
+        Vec::<String>::new()
+    );
+    assert_eq!(
+        exports
+            .call_list_values(&instance, &mut store)
+            .expect("list values"),
+        vec!["alpha".to_owned(), "beta".to_owned()]
+    );
+    assert_eq!(
+        exports
+            .call_exercise_list_import(&mut store)
+            .expect("list import"),
+        14
+    );
+
+    assert_eq!(
+        exports
+            .call_callbacks_tick_count(&instance, &mut store)
+            .expect("direct interface u32"),
+        7
+    );
+    assert!(store
+        .data()
+        .trace
+        .iter()
+        .any(|entry| entry == "list-echo([2, 4, 8])"));
+}
+
+#[test]
+fn generated_list_import_rejects_malformed_lengths_without_panicking() {
+    let engine = Engine::new(&Config::new()).expect("engine");
+    let wasm = wat::parse_str(
+        r#"(module
+            (import "aegilex:core-abi-probe/probe@0.1.0" "list-echo" (func $list-echo (param i32 i32) (result i32)))
+            (memory (export "memory") 1)
+            (func (export "entry") (result i32)
+                i32.const 0
+                i32.const -1
+                call $list-echo)
+        )"#,
+    )
+    .expect("malformed WAT");
+    let module = Module::new(&engine, wasm).expect("malformed module");
+    let linker = build_probe_linker(&engine).expect("linker");
+    let mut store = new_probe_store(&engine);
+    let instance = linker
+        .instantiate(&mut store, &module)
+        .expect("instantiate");
+    let entry = instance
+        .get_typed_func::<(), i32>(&mut store, "entry")
+        .expect("entry");
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        entry.call(&mut store, ())
+    }));
+    assert!(result.is_ok(), "malformed list import must not panic");
+    assert!(result.unwrap().is_err(), "malformed list import must trap");
+    assert!(!store.as_context().data().trace.iter().any(|entry| entry.starts_with("list-echo")));
 }
 
 #[test]

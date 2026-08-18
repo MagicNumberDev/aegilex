@@ -25,6 +25,34 @@ impl Guest for Probe {
         probe::log(&format!("entry: {echoed} maybe={maybe}"));
         format!("{echoed}/{maybe}")
     }
+
+    fn direct_u32(value: u32) -> u32 {
+        value.wrapping_add(1)
+    }
+
+    fn direct_i64(value: i64) -> i64 {
+        value.wrapping_neg()
+    }
+
+    fn direct_f32() -> f32 {
+        f32::from_bits(0x4049_0fdb)
+    }
+
+    fn direct_f64() -> f64 {
+        f64::from_bits(0x4009_21fb_5444_2d18)
+    }
+
+    fn empty_list_values() -> Vec<String> {
+        Vec::new()
+    }
+
+    fn list_values() -> Vec<String> {
+        vec!["alpha".to_owned(), "beta".to_owned()]
+    }
+
+    fn exercise_list_import() -> u32 {
+        probe::list_echo(&[2, 4, 8])
+    }
 }
 
 impl callbacks::Guest for Probe {
@@ -32,6 +60,10 @@ impl callbacks::Guest for Probe {
 
     fn on_tick() -> Result<(), String> {
         Ok(())
+    }
+
+    fn tick_count() -> u32 {
+        7
     }
 }
 

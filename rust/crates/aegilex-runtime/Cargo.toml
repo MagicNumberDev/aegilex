@@ -15,6 +15,9 @@ toml = "0.8.23"
 wasmtime = { version = "30.0.2", default-features = false, features = ["cranelift", "runtime"] }
 wasmtime-wasi = { version = "30.0.2", default-features = false, features = ["preview1"] }
 
+[dev-dependencies]
+wat = "1.0"
+
 [build-dependencies]
 aegilex-core-bindgen = { path = "../aegilex-core-bindgen" }
 cxx-build = "1.0"

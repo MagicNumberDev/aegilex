@@ -237,6 +237,31 @@ impl<'a> HostImportBindgen<'a> {
     }
 }
 
+fn map_bitcast(operand: &str, cast: &Bitcast) -> Result<String, &'static str> {
+    match cast {
+        Bitcast::None => Ok(operand.to_owned()),
+        Bitcast::I32ToI64 => Ok(format!("({operand} as i64)")),
+        Bitcast::F32ToI32 => Ok(format!("({operand}).to_bits() as i32")),
+        Bitcast::F64ToI64 => Ok(format!("({operand}).to_bits() as i64")),
+        Bitcast::I64ToI32 => Ok(format!("({operand} as i32)")),
+        Bitcast::I32ToF32 => Ok(format!("f32::from_bits({operand} as u32)")),
+        Bitcast::I64ToF64 => Ok(format!("f64::from_bits({operand} as u64)")),
+        Bitcast::F32ToI64 => Ok(format!("i64::from(({operand}).to_bits())")),
+        Bitcast::I64ToF32 => Ok(format!("f32::from_bits(({operand}) as u32)")),
+        Bitcast::I64ToP64 | Bitcast::PToP64 | Bitcast::P64ToI64 | Bitcast::P64ToP => {
+            Ok(format!("({operand} as i64)"))
+        }
+        Bitcast::I32ToP | Bitcast::LToP | Bitcast::PToI32 | Bitcast::LToI32 => {
+            Ok(format!("({operand} as i32)"))
+        }
+        Bitcast::I32ToL | Bitcast::I64ToL | Bitcast::PToL => Ok(format!("({operand} as i32)")),
+        Bitcast::LToI64 => Ok(format!("({operand} as i64)")),
+        Bitcast::Sequence(sequence) => sequence.iter().try_fold(operand.to_owned(), |value, cast| {
+            map_bitcast(&value, cast)
+        }),
+    }
+}
+
 impl wit_bindgen_core::abi::Bindgen for HostImportBindgen<'_> {
     type Operand = String;
 
@@ -296,32 +321,13 @@ impl wit_bindgen_core::abi::Bindgen for HostImportBindgen<'_> {
             Instruction::Bitcasts { casts } => {
                 let mut casted = Vec::with_capacity(casts.len());
                 for (operand, cast) in operands.drain(..).zip(casts.iter()) {
-                    casted.push(match cast {
-                        Bitcast::None => operand,
-                        Bitcast::I32ToI64 => format!("({operand} as i64)"),
-                        Bitcast::F32ToI32 => format!("({operand}).to_bits() as i32"),
-                        Bitcast::F64ToI64 => format!("({operand}).to_bits() as i64"),
-                        Bitcast::I64ToI32 => format!("({operand} as i32)"),
-                        Bitcast::I32ToF32 => format!("f32::from_bits({operand} as u32)"),
-                        Bitcast::I64ToF64 => format!("f64::from_bits({operand} as u64)"),
-                        Bitcast::F32ToI64 => format!("i64::from(({operand}).to_bits())"),
-                        Bitcast::I64ToF32 => format!("f32::from_bits(({operand}) as u32)"),
-                        Bitcast::I64ToP64
-                        | Bitcast::PToP64
-                        | Bitcast::P64ToI64
-                        | Bitcast::P64ToP => format!("({operand} as i64)"),
-                        Bitcast::I32ToP | Bitcast::LToP => format!("({operand} as i32)"),
-                        Bitcast::PToI32 | Bitcast::LToI32 => format!("({operand} as i32)"),
-                        Bitcast::I32ToL | Bitcast::I64ToL | Bitcast::PToL => {
-                            format!("({operand} as i32)")
+                    match map_bitcast(&operand, cast) {
+                        Ok(value) => casted.push(value),
+                        Err(message) => {
+                            let _ = writeln!(self.out, "return Err(trap({message:?}));");
+                            casted.push("()".to_owned());
                         }
-                        Bitcast::LToI64 => format!("({operand} as i64)"),
-                        Bitcast::Sequence(sequence) => {
-                            let [first, _] = &**sequence;
-                            let _ = first;
-                            "(operand as i64)".to_string()
-                        }
-                    });
+                    }
                 }
                 results.extend(casted);
             }
@@ -522,11 +528,11 @@ impl wit_bindgen_core::abi::Bindgen for HostImportBindgen<'_> {
             Instruction::StringLower { realloc } => {
                 let value = pop();
                 let value = self.bind(value);
+                let len = self.bind(format!("i32::try_from({value}.len()).map_err(|_| trap(\"string length exceeds i32\"))?"));
                 let ptr = self.bind(format!("alloc(&mut caller, &mem, {value}.len(), 1)?"));
                 self.emit_statement(format!(
-                    "mem.data_mut(caller.as_context_mut()).get_mut({ptr} as usize..).and_then(|slice| slice.get_mut(..{value}.len())).ok_or_else(|| trap(\"allocation out of bounds\"))?.copy_from_slice({value}.as_bytes());"
+                    "let start = usize::try_from({ptr}).map_err(|_| trap(\"string pointer out of range\"))?; let end = start.checked_add({value}.len()).ok_or_else(|| trap(\"string range overflow\"))?; mem.data_mut(caller.as_context_mut()).get_mut(start..end).ok_or_else(|| trap(\"string range out of bounds\"))?.copy_from_slice({value}.as_bytes());"
                 ));
-                let len = self.bind(format!("{value}.len() as i32"));
                 let _ = realloc;
                 results.push(ptr);
                 results.push(len);
@@ -535,7 +541,8 @@ impl wit_bindgen_core::abi::Bindgen for HostImportBindgen<'_> {
             Instruction::ListCanonLift { element, .. } => {
                 let len = pop();
                 let ptr = pop();
-                let value = self.bind(format!("read_bytes(caller, &mem, {ptr}, {len})?"));
+                let len = self.bind(format!("usize::try_from({len}).map_err(|_| trap(\"list length out of range\"))?"));
+                let value = self.bind(format!("read_bytes(&mut caller, &mem, {ptr}, 0, {len})?"));
                 let _ = element;
                 results.push(value);
             }
@@ -546,15 +553,15 @@ impl wit_bindgen_core::abi::Bindgen for HostImportBindgen<'_> {
                 let ptr = pop();
                 let tmp = self.tmp();
                 let size = self.size32(element);
-                let _ = writeln!(self.out, "let base{tmp} = {ptr};");
-                let _ = writeln!(self.out, "let len{tmp} = {len};");
-                let _ = writeln!(
-                    self.out,
-                    "let mut vec{tmp}: Vec<{}> = Vec::with_capacity(len{tmp} as usize);",
-                    self.rust_type(element)
-                );
+                let _ = writeln!(self.out, "let len{tmp} = usize::try_from({len}).map_err(|_| trap(\"list length out of range\"))?;");
+                let _ = writeln!(self.out, "let base{tmp} = usize::try_from({ptr}).map_err(|_| trap(\"list pointer out of range\"))?;");
+                let _ = writeln!(self.out, "let span{tmp} = len{tmp}.checked_mul({size}).ok_or_else(|| trap(\"list size overflow\"))?;");
+                let _ = writeln!(self.out, "let end{tmp} = base{tmp}.checked_add(span{tmp}).ok_or_else(|| trap(\"list range overflow\"))?;");
+                let _ = writeln!(self.out, "if end{tmp} > mem.data(caller.as_context()).len() {{ return Err(trap(\"list range out of bounds\")); }}");
+                let _ = writeln!(self.out, "let mut vec{tmp}: Vec<{}> = Vec::with_capacity(len{tmp});", self.rust_type(element));
                 let _ = writeln!(self.out, "for i{tmp} in 0..len{tmp} {{");
-                let _ = writeln!(self.out, "let base = base{tmp} + i{tmp} * {size};");
+                let _ = writeln!(self.out, "let offset{tmp} = i{tmp}.checked_mul({size}).ok_or_else(|| trap(\"list offset overflow\"))?;");
+                let _ = writeln!(self.out, "let base = i32::try_from(base{tmp}.checked_add(offset{tmp}).ok_or_else(|| trap(\"list pointer overflow\"))?).map_err(|_| trap(\"list pointer out of range\"))?;");
                 let _ = writeln!(self.out, "let e{tmp} = {body};");
                 let _ = writeln!(self.out, "vec{tmp}.push(e{tmp});");
                 let _ = writeln!(self.out, "}}");
@@ -565,15 +572,14 @@ impl wit_bindgen_core::abi::Bindgen for HostImportBindgen<'_> {
                 let value = pop();
                 let _ = element;
                 let value = self.bind(value);
+                let len = self.bind(format!("i32::try_from({value}.len()).map_err(|_| trap(\"list length exceeds i32\"))?"));
                 let ptr = self.bind(format!("alloc(&mut caller, &mem, {value}.len(), 1)?"));
                 self.emit_statement(format!(
-                    "mem.data_mut(caller.as_context_mut()).get_mut({ptr} as usize..).and_then(|slice| slice.get_mut(..{value}.len())).ok_or_else(|| trap(\"allocation out of bounds\"))?.copy_from_slice(&{value});"
+                    "let start = usize::try_from({ptr}).map_err(|_| trap(\"list pointer out of range\"))?; let end = start.checked_add({value}.len()).ok_or_else(|| trap(\"list range overflow\"))?; mem.data_mut(caller.as_context_mut()).get_mut(start..end).ok_or_else(|| trap(\"list range out of bounds\"))?.copy_from_slice(&{value});"
                 ));
-                let len = self.bind(format!("{value}.len() as i32"));
                 results.push(ptr);
                 results.push(len);
             }
-
             Instruction::ListLower { element, realloc } => {
                 let body = self.blocks.pop().expect("list block");
                 let value = pop();
@@ -585,14 +591,13 @@ impl wit_bindgen_core::abi::Bindgen for HostImportBindgen<'_> {
                 let ptr = self.bind(format!(
                     "alloc(&mut caller, &mem, len{tmp}.checked_mul({size}).ok_or_else(|| trap(\"list size overflow\"))?, {align})?"
                 ));
-                let _ = writeln!(
-                    self.out,
-                    "for (i{tmp}, e) in vec{tmp}.into_iter().enumerate() {{"
-                );
-                let _ = writeln!(self.out, "let base = {ptr} + (i{tmp} * {size}) as i32;");
+                let _ = writeln!(self.out, "let base{tmp} = usize::try_from({ptr}).map_err(|_| trap(\"list pointer out of range\"))?;");
+                let _ = writeln!(self.out, "for (i{tmp}, e) in vec{tmp}.into_iter().enumerate() {{");
+                let _ = writeln!(self.out, "let offset{tmp} = i{tmp}.checked_mul({size}).ok_or_else(|| trap(\"list offset overflow\"))?;");
+                let _ = writeln!(self.out, "let base = i32::try_from(base{tmp}.checked_add(offset{tmp}).ok_or_else(|| trap(\"list pointer overflow\"))?).map_err(|_| trap(\"list pointer out of range\"))?;");
                 let _ = writeln!(self.out, "{body}");
                 let _ = writeln!(self.out, "}}");
-                let len = self.bind(format!("len{tmp} as i32"));
+                let len = self.bind(format!("i32::try_from(len{tmp}).map_err(|_| trap(\"list length exceeds i32\"))?"));
                 let _ = realloc;
                 results.push(ptr);
                 results.push(len);
@@ -910,3 +915,20 @@ impl wit_bindgen_core::abi::Bindgen for HostImportBindgen<'_> {
 }
 
 impl<'a> HostImportBindgen<'a> {}
+
+#[cfg(test)]
+mod tests {
+    use super::map_bitcast;
+    use wit_bindgen_core::abi::Bitcast;
+
+    #[test]
+    fn bitcast_sequence_folds_the_real_operand_in_order() {
+        let sequence = Bitcast::Sequence(Box::new([
+            Bitcast::I32ToI64,
+            Bitcast::I64ToI32,
+        ]));
+        let expression = map_bitcast("value", &sequence).expect("sequence mapping");
+        assert_eq!(expression, "((value as i64) as i32)");
+        assert!(!expression.contains("operand"));
+    }
+}

@@ -340,40 +340,40 @@ fn alloc<T>(caller: &mut Caller<'_, T>, mem: &Memory, size: usize, align: usize)
         .map_err(|error| trap(format!("cabi_realloc failed: {{error}}")))
 }}
 
+fn checked_range(base: i32, offset: usize, len: usize, memory_len: usize) -> anyhow::Result<std::ops::Range<usize>> {{
+    let base = usize::try_from(base).map_err(|_| trap("pointer out of range"))?;
+    let start = base.checked_add(offset).ok_or_else(|| trap("pointer offset overflow"))?;
+    let end = start.checked_add(len).ok_or_else(|| trap("range overflow"))?;
+    if end > memory_len {{
+        return Err(trap("memory range out of bounds"));
+    }}
+    Ok(start..end)
+}}
+
 fn lift_string<T>(caller: &mut Caller<'_, T>, mem: &Memory, ptr: i32, len: i32) -> anyhow::Result<String> {{
-    let ptr = usize::try_from(ptr).map_err(|_| trap("string pointer out of range"))?;
     let len = usize::try_from(len).map_err(|_| trap("string length out of range"))?;
-    let bytes = mem
-        .data(caller.as_context())
-        .get(ptr..)
-        .and_then(|slice| slice.get(..len))
-        .ok_or_else(|| trap("string out of bounds"))?;
-    std::str::from_utf8(bytes)
+    let data = mem.data(caller.as_context());
+    let range = checked_range(ptr, 0, len, data.len())?;
+    std::str::from_utf8(&data[range])
         .map(str::to_owned)
         .map_err(|error| trap(format!("invalid UTF-8: {{error}}")))
 }}
 
 fn lift_string_at<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, offset: usize) -> anyhow::Result<String> {{
+    let len_offset = offset.checked_add(4).ok_or_else(|| trap("string offset overflow"))?;
     let ptr = read_i32_at(caller, mem, base, offset)?;
-    let len = read_i32_at(caller, mem, base, offset + 4)?;
+    let len = read_i32_at(caller, mem, base, len_offset)?;
     lift_string(caller, mem, ptr, len)
 }}
 
 fn lower_string_into<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, offset: usize, value: &str) -> anyhow::Result<()> {{
     let size = value.len();
     let ptr = alloc(caller, mem, size, 1)?;
-    let ptr_usize = usize::try_from(ptr).map_err(|_| trap("allocation pointer out of range"))?;
-    mem.data_mut(caller.as_context_mut())
-        .get_mut(ptr_usize..)
-        .and_then(|slice| slice.get_mut(..size))
-        .ok_or_else(|| trap("allocation out of bounds"))?
-        .copy_from_slice(value.as_bytes());
-    let base = usize::try_from(base).map_err(|_| trap("result area out of range"))?;
-    let slot = mem
-        .data_mut(caller.as_context_mut())
-        .get_mut(base + offset..)
-        .and_then(|slice| slice.get_mut(..8))
-        .ok_or_else(|| trap("result area out of bounds"))?;
+    let data_len = mem.data(caller.as_context()).len();
+    let ptr_range = checked_range(ptr, 0, size, data_len)?;
+    mem.data_mut(caller.as_context_mut())[ptr_range].copy_from_slice(value.as_bytes());
+    let slot_range = checked_range(base, offset, 8, data_len)?;
+    let slot = &mut mem.data_mut(caller.as_context_mut())[slot_range];
     let size = i32::try_from(size).map_err(|_| trap("string too large"))?;
     slot[..4].copy_from_slice(&ptr.to_le_bytes());
     slot[4..].copy_from_slice(&size.to_le_bytes());
@@ -381,34 +381,22 @@ fn lower_string_into<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, off
 }}
 
 fn read_bytes<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, offset: usize, len: usize) -> anyhow::Result<Vec<u8>> {{
-    let base = usize::try_from(base).map_err(|_| trap("pointer out of range"))?;
-    Ok(mem
-        .data(caller.as_context())
-        .get(base + offset..)
-        .and_then(|slice| slice.get(..len))
-        .ok_or_else(|| trap("read out of bounds"))?
-        .to_vec())
+    let data = mem.data(caller.as_context());
+    Ok(data[checked_range(base, offset, len, data.len())?].to_vec())
 }}
 
 fn read_i32_at<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, offset: usize) -> anyhow::Result<i32> {{
-    let base = usize::try_from(base).map_err(|_| trap("pointer out of range"))?;
-    let bytes = mem
-        .data(caller.as_context())
-        .get(base + offset..)
-        .and_then(|slice| slice.get(..4))
-        .ok_or_else(|| trap("read out of bounds"))?;
-    Ok(i32::from_le_bytes(bytes.try_into().expect("4 bytes")))
+    let data = mem.data(caller.as_context());
+    let bytes = &data[checked_range(base, offset, 4, data.len())?];
+    Ok(i32::from_le_bytes(bytes.try_into().map_err(|_| trap("read width mismatch"))?))
 }}
 
 fn read_i64_at<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, offset: usize) -> anyhow::Result<i64> {{
-    let base = usize::try_from(base).map_err(|_| trap("pointer out of range"))?;
-    let bytes = mem
-        .data(caller.as_context())
-        .get(base + offset..)
-        .and_then(|slice| slice.get(..8))
-        .ok_or_else(|| trap("read out of bounds"))?;
-    Ok(i64::from_le_bytes(bytes.try_into().expect("8 bytes")))
+    let data = mem.data(caller.as_context());
+    let bytes = &data[checked_range(base, offset, 8, data.len())?];
+    Ok(i64::from_le_bytes(bytes.try_into().map_err(|_| trap("read width mismatch"))?))
 }}
+
 
 fn read_f32_at<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, offset: usize) -> anyhow::Result<f32> {{
     Ok(f32::from_bits(read_i32_at(caller, mem, base, offset)? as u32))
@@ -420,22 +408,16 @@ fn read_f64_at<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, offset: u
 
 fn read_i32_at_s<T: AsContext>(store: &T, mem: &Memory, base: i32, offset: usize) -> anyhow::Result<i32> {{
     let base = usize::try_from(base).map_err(|_| trap("pointer out of range"))?;
-    let bytes = mem
-        .data(store.as_context())
-        .get(base + offset..)
-        .and_then(|slice| slice.get(..4))
-        .ok_or_else(|| trap("read out of bounds"))?;
-    Ok(i32::from_le_bytes(bytes.try_into().expect("4 bytes")))
+    let start = base.checked_add(offset).ok_or_else(|| trap("pointer offset overflow"))?;
+    let end = start.checked_add(4).ok_or_else(|| trap("range overflow"))?;
+    let bytes = mem.data(store.as_context()).get(start..end).ok_or_else(|| trap("read out of bounds"))?;
+    Ok(i32::from_le_bytes(bytes.try_into().map_err(|_| trap("read width mismatch"))?))
 }}
 
 fn read_i64_at_s<T: AsContext>(store: &T, mem: &Memory, base: i32, offset: usize) -> anyhow::Result<i64> {{
-    let base = usize::try_from(base).map_err(|_| trap("pointer out of range"))?;
-    let bytes = mem
-        .data(store.as_context())
-        .get(base + offset..)
-        .and_then(|slice| slice.get(..8))
-        .ok_or_else(|| trap("read out of bounds"))?;
-    Ok(i64::from_le_bytes(bytes.try_into().expect("8 bytes")))
+    let data = mem.data(store.as_context());
+    let bytes = &data[checked_range(base, offset, 8, data.len())?];
+    Ok(i64::from_le_bytes(bytes.try_into().map_err(|_| trap("read width mismatch"))?))
 }}
 
 fn read_f32_at_s<T: AsContext>(store: &T, mem: &Memory, base: i32, offset: usize) -> anyhow::Result<f32> {{
@@ -447,24 +429,25 @@ fn read_f64_at_s<T: AsContext>(store: &T, mem: &Memory, base: i32, offset: usize
 }}
 
 fn lift_string_at_s<T: AsContext>(store: &T, mem: &Memory, base: i32, offset: usize) -> anyhow::Result<String> {{
+    let len_offset = offset.checked_add(4).ok_or_else(|| trap("string offset overflow"))?;
     let ptr = read_i32_at_s(store, mem, base, offset)?;
-    let len = read_i32_at_s(store, mem, base, offset + 4)?;
-    let ptr = usize::try_from(ptr).map_err(|_| trap("string pointer out of range"))?;
+    let len = read_i32_at_s(store, mem, base, len_offset)?;
     let len = usize::try_from(len).map_err(|_| trap("string length out of range"))?;
-    let bytes = mem
-        .data(store.as_context())
-        .get(ptr..)
-        .and_then(|slice| slice.get(..len))
-        .ok_or_else(|| trap("string out of bounds"))?;
-    std::str::from_utf8(bytes)
+    let data = mem.data(store.as_context());
+    let range = checked_range(ptr, 0, len, data.len())?;
+    std::str::from_utf8(&data[range])
         .map(str::to_owned)
         .map_err(|error| trap(format!("invalid UTF-8: {{error}}")))
 }}
 
 fn lift_list_string_at_s<T: AsContext>(store: &T, mem: &Memory, base: i32, offset: usize) -> anyhow::Result<Vec<String>> {{
     let ptr = read_i32_at_s(store, mem, base, offset)?;
-    let len = read_i32_at_s(store, mem, base, offset + 4)?;
+    let len = read_i32_at_s(store, mem, base, offset.checked_add(4).ok_or_else(|| trap("list offset overflow"))?)?;
     let len = usize::try_from(len).map_err(|_| trap("list length out of range"))?;
+    let span = len.checked_mul(8).ok_or_else(|| trap("list size overflow"))?;
+    let ptr_usize = usize::try_from(ptr).map_err(|_| trap("list pointer out of range"))?;
+    let end = ptr_usize.checked_add(span).ok_or_else(|| trap("list range overflow"))?;
+    if end > mem.data(store.as_context()).len() {{ return Err(trap("list out of bounds")); }}
     let mut values = Vec::with_capacity(len);
     for index in 0..len {{
         let element_offset = index.checked_mul(8).ok_or_else(|| trap("list offset overflow"))?;
@@ -472,7 +455,6 @@ fn lift_list_string_at_s<T: AsContext>(store: &T, mem: &Memory, base: i32, offse
     }}
     Ok(values)
 }}
-
 fn alloc_s<T: AsContextMut>(store: &mut T, instance: &Instance, mem: &Memory, size: usize, align: usize) -> anyhow::Result<i32> {{
     let size = i32::try_from(size).map_err(|_| trap("allocation size out of range"))?;
     let align = i32::try_from(align).map_err(|_| trap("allocation alignment out of range"))?;
@@ -1126,9 +1108,9 @@ fn lift_list_string_at<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, o
             Type::String => {
                 let ptr = self.bind(format!("alloc_s(store, instance, &mem, {value}.len(), 1)?"));
                 self.emit_statement(format!(
-                    "mem.data_mut(store.as_context_mut()).get_mut({ptr} as usize..).and_then(|s| s.get_mut(..{value}.len())).ok_or_else(|| trap(\"allocation out of bounds\"))?.copy_from_slice({value}.as_bytes());"
+                    "let ptr_usize = usize::try_from({ptr}).map_err(|_| trap(\"string pointer out of range\"))?; let end = ptr_usize.checked_add({value}.len()).ok_or_else(|| trap(\"string range overflow\"))?; mem.data_mut(store.as_context_mut()).get_mut(ptr_usize..end).ok_or_else(|| trap(\"allocation out of bounds\"))?.copy_from_slice({value}.as_bytes());"
                 ));
-                vec![ptr, format!("{value}.len() as i32")]
+                vec![ptr, format!("i32::try_from({value}.len()).map_err(|_| trap(\"string length out of range\"))?")]
             }
             Type::Id(id) => {
                 let kind = self.resolve.types[*id].kind.clone();
@@ -1141,31 +1123,21 @@ fn lift_list_string_at<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, o
                             let ptr = self.bind(format!(
                                 "lower_list_string_param_s(store, instance, &mem, &{value})?"
                             ));
-                            vec![ptr, format!("{value}.len() as i32")]
+                            vec![ptr, format!("i32::try_from({value}.len()).map_err(|_| trap(\"list length out of range\"))?")]
                         } else if matches!(inner, Type::U8) {
-                            let ptr = self
-                                .bind(format!("alloc_s(store, instance, &mem, {value}.len(), 1)?"));
-                            self.emit_statement(format!(
-                                "mem.data_mut(store.as_context_mut()).get_mut({ptr} as usize..).and_then(|s| s.get_mut(..{value}.len())).ok_or_else(|| trap(\"allocation out of bounds\"))?.copy_from_slice({value}.as_slice());"
-                            ));
-                            vec![ptr, format!("{value}.len() as i32")]
+                            let ptr = self.bind(format!("alloc_s(store, instance, &mem, {value}.len(), 1)?"));
+                            self.emit_statement(format!("mem.data_mut(store.as_context_mut()).get_mut({ptr} as usize..).and_then(|s| s.get_mut(..{value}.len())).ok_or_else(|| trap(\"allocation out of bounds\"))?.copy_from_slice({value}.as_slice());"));
+                            vec![ptr, format!("i32::try_from({value}.len()).map_err(|_| trap(\"list length out of range\"))?")]
                         } else {
-                            // Allocate the element array and write each element.
                             let size = self.size_of(inner);
                             let align = self.align_of(inner);
-                            let ptr = self.bind(format!(
-                                "alloc_s(store, instance, &mem, {value}.len().checked_mul({size}).ok_or_else(|| trap(\"list size overflow\"))?, {align})?"
-                            ));
+                            let ptr = self.bind(format!("alloc_s(store, instance, &mem, {value}.len().checked_mul({size}).ok_or_else(|| trap(\"list size overflow\"))?, {align})?"));
                             let tmp = self.tmp();
-                            let _ = writeln!(
-                                self.out,
-                                "for (i{tmp}, e) in {value}.iter().enumerate() {{"
-                            );
-                            let _ =
-                                writeln!(self.out, "let base = {ptr} + (i{tmp} * {size}) as i32;");
+                            let _ = writeln!(self.out, "for (i{tmp}, e) in {value}.iter().enumerate() {{");
+                            let _ = writeln!(self.out, "let base = {ptr}.checked_add(i{tmp}.checked_mul({size}).ok_or_else(|| trap(\"list offset overflow\"))? as i32).ok_or_else(|| trap(\"list pointer overflow\"))?;");
                             self.emit_write_mem(inner, "e", "base", 0);
                             let _ = writeln!(self.out, "}}");
-                            vec![ptr, format!("{value}.len() as i32")]
+                            vec![ptr, format!("i32::try_from({value}.len()).map_err(|_| trap(\"list length out of range\"))?")]
                         }
                     }
                     TypeDefKind::Record(record) => {
@@ -1379,7 +1351,7 @@ fn lift_list_string_at<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, o
                                 "write_i32_at_s(store, &mem, {base}, {offset}, {ptr})?;"
                             ));
                             self.emit_statement(format!(
-                                "write_i32_at_s(store, &mem, {base}, {offset} + 4, {value}.len() as i32)?;"
+                                "write_i32_at_s(store, &mem, {base}, ({offset}usize).checked_add(4).ok_or_else(|| trap(\"list offset overflow\"))?, i32::try_from({value}.len()).map_err(|_| trap(\"list length out of range\"))?)?;"
                             ));
                         } else {
                             let size = self.size_of(inner);
@@ -1400,7 +1372,7 @@ fn lift_list_string_at<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, o
                                 "write_i32_at_s(store, &mem, {base}, {offset}, {ptr})?;"
                             ));
                             self.emit_statement(format!(
-                                "write_i32_at_s(store, &mem, {base}, {offset} + 4, {value}.len() as i32)?;"
+                                "write_i32_at_s(store, &mem, {base}, ({offset}usize).checked_add(4).ok_or_else(|| trap(\"list offset overflow\"))?, i32::try_from({value}.len()).map_err(|_| trap(\"list length out of range\"))?)?;"
                             ));
                         }
                     }
@@ -1559,23 +1531,20 @@ fn lift_list_string_at<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, o
                     }
                     TypeDefKind::List(inner) => {
                         if matches!(inner, Type::String) {
-                            self.bind(format!(
-                                "lift_list_string_at_s(store, &mem, {base}, {offset})?"
-                            ))
+                            self.bind(format!("lift_list_string_at_s(store, &mem, {base}, {offset})?"))
                         } else {
-                            let ptr =
-                                self.bind(format!("read_i32_at_s(store, &mem, {base}, {offset})?"));
-                            let len = self
-                                .bind(format!("read_i32_at_s(store, &mem, {base}, {offset} + 4)?"));
+                            let ptr = self.bind(format!("read_i32_at_s(store, &mem, {base}, {offset})?"));
+                            let len = self.bind(format!("read_i32_at_s(store, &mem, {base}, ({offset}usize).checked_add(4).ok_or_else(|| trap(\"list offset overflow\"))?)?"));
+                            let len_usize = self.bind(format!("usize::try_from({len}).map_err(|_| trap(\"list length out of range\"))?"));
                             let tmp = self.tmp();
                             let size = self.size_of(inner);
                             let element = self.rust_type(inner);
-                            let _ = writeln!(
-                                self.out,
-                                "let mut vec{tmp}: Vec<{element}> = Vec::with_capacity({len} as usize);"
-                            );
-                            let _ = writeln!(self.out, "for i{tmp} in 0..{len} {{");
-                            let _ = writeln!(self.out, "let base = {ptr} + i{tmp} * {size};");
+                            let _ = writeln!(self.out, "let span{tmp} = {len_usize}.checked_mul({size}).ok_or_else(|| trap(\"list size overflow\"))?;");
+                            let _ = writeln!(self.out, "let ptr{tmp} = usize::try_from({ptr}).map_err(|_| trap(\"list pointer out of range\"))?;");
+                            let _ = writeln!(self.out, "if ptr{tmp}.checked_add(span{tmp}).ok_or_else(|| trap(\"list range overflow\"))? > mem.data(store.as_context()).len() {{ return Err(trap(\"list out of bounds\")); }}");
+                            let _ = writeln!(self.out, "let mut vec{tmp}: Vec<{element}> = Vec::with_capacity({len_usize});");
+                            let _ = writeln!(self.out, "for i{tmp} in 0..{len_usize} {{");
+                            let _ = writeln!(self.out, "let base = {ptr}.checked_add((i{tmp}.checked_mul({size}).ok_or_else(|| trap(\"list offset overflow\"))? as i32)).ok_or_else(|| trap(\"list pointer overflow\"))?;");
                             let value = self.emit_read_result(inner, "base", 0);
                             let _ = writeln!(self.out, "vec{tmp}.push({value});");
                             let _ = writeln!(self.out, "}}");
@@ -1697,6 +1666,71 @@ fn lift_list_string_at<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, o
             value.div_ceil(align) * align
         }
     }
+    fn wasm_tuple_type(types: &[WasmType]) -> String {
+        match types {
+            [] => "()".to_owned(),
+            [ty] => Self::wasm_ty_name(ty).to_owned(),
+            _ => format!("({})", types.iter().map(Self::wasm_ty_name).collect::<Vec<_>>().join(", ")),
+        }
+    }
+
+    fn wasm_call_args(args: &[String]) -> String {
+        match args {
+            [] => "()".to_owned(),
+            [arg] => arg.clone(),
+            _ => format!("({})", args.join(", ")),
+        }
+    }
+
+    fn emit_direct_result(&mut self, ty: &Type, value: &str) -> String {
+        match ty {
+            Type::String => {
+                let _ = writeln!(self.out, "return Err(trap(\"unsupported direct string result\"));");
+                "()".to_owned()
+            }
+            Type::Bool => {
+                let tmp = self.tmp();
+                let _ = writeln!(self.out, "let v{tmp} = match {value} {{ 0 => false, 1 => true, _ => return Err(trap(\"invalid bool value\")), }};");
+                format!("v{tmp}")
+            }
+            Type::U8 => format!("({value} as u8)"),
+            Type::U16 => format!("({value} as u16)"),
+            Type::U32 => format!("({value} as u32)"),
+            Type::U64 => format!("({value} as u64)"),
+            Type::S8 => format!("({value} as i8)"),
+            Type::S16 => format!("({value} as i16)"),
+            Type::S32 | Type::S64 | Type::F32 | Type::F64 => value.to_owned(),
+            Type::Char => {
+                let tmp = self.tmp();
+                let _ = writeln!(self.out, "let v{tmp} = char::from_u32({value} as u32).ok_or_else(|| trap(\"invalid char value\"))?;");
+                format!("v{tmp}")
+            }
+            Type::ErrorContext => format!("({value} as u32)"),
+            Type::Id(id) => {
+                let kind = self.resolve.types[*id].kind.clone();
+                match kind {
+                    TypeDefKind::Type(inner) => self.emit_direct_result(&inner, value),
+                    TypeDefKind::Handle(_) => format!("({value} as u32)"),
+                    TypeDefKind::Enum(enum_) => {
+                        let tmp = self.tmp();
+                        let enum_name = self.type_rust_name(*id);
+                        let _ = writeln!(self.out, "let v{tmp} = match {value} {{");
+                        for (index, case) in enum_.cases.iter().enumerate() {
+                            let case_name = Self::rust_ident(&case.name);
+                            let _ = writeln!(self.out, "    {index} => {enum_name}::{case_name},");
+                        }
+                        let _ = writeln!(self.out, "    _ => return Err(trap(\"invalid enum discriminant\")),");
+                        let _ = writeln!(self.out, "}};");
+                        format!("v{tmp}")
+                    }
+                    _ => {
+                        let _ = writeln!(self.out, "return Err(trap(\"unsupported direct result type\"));");
+                        "()".to_owned()
+                    }
+                }
+            }
+        }
+    }
 
     fn emit_exports(&mut self) {
         let mut exports: Vec<(String, Interface)> = Vec::new();
@@ -1718,150 +1752,74 @@ fn lift_list_string_at<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, o
         let _ = writeln!(self.out, "    pub struct CoreExports {{");
         for (name, function) in &freestanding {
             let field = Self::sanitize_field(name);
-            let call_ty = if function.result.is_some() {
-                "(), i32"
-            } else {
-                "(), ()"
-            };
-            let _ = writeln!(
-                self.out,
-                "        pub {field}: Option<wasmtime::TypedFunc<{call_ty}>>,"
-            );
-            let _ = writeln!(
-                self.out,
-                "        pub {field}_post: Option<wasmtime::TypedFunc<i32, ()>>,"
-            );
+            let signature = self.resolve.wasm_signature(AbiVariant::GuestExport, function);
+            let params = Self::wasm_tuple_type(&signature.params);
+            let results = if signature.retptr { "i32".to_owned() } else { Self::wasm_tuple_type(&signature.results) };
+            let _ = writeln!(self.out, "        pub {field}: Option<wasmtime::TypedFunc<{params}, {results}>>,");
+            if signature.retptr { let _ = writeln!(self.out, "        pub {field}_post: Option<wasmtime::TypedFunc<i32, ()>>,"); }
         }
         for (_, interface) in &exports {
             for function in interface.functions.values() {
                 let name = Self::export_field_name(interface, function);
-                let signature = self
-                    .resolve
-                    .wasm_signature(AbiVariant::GuestExport, function);
-                let flat = signature
-                    .params
-                    .iter()
-                    .map(|ty| Self::wasm_ty_name(ty))
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                let result_ty = if signature.retptr {
-                    "i32".to_owned()
-                } else if signature.results.is_empty() {
-                    "()".to_owned()
-                } else {
-                    "i32".to_owned()
-                };
-                let _ = writeln!(
-                    self.out,
-                    "        {name}: Option<wasmtime::TypedFunc<({flat}), {result_ty}>>,"
-                );
-                if signature.retptr {
-                    let _ = writeln!(
-                        self.out,
-                        "        pub {name}_post: Option<wasmtime::TypedFunc<i32, ()>>,"
-                    );
-                }
+                let signature = self.resolve.wasm_signature(AbiVariant::GuestExport, function);
+                let params = Self::wasm_tuple_type(&signature.params);
+                let results = if signature.retptr { "i32".to_owned() } else { Self::wasm_tuple_type(&signature.results) };
+                let _ = writeln!(self.out, "        pub {name}: Option<wasmtime::TypedFunc<{params}, {results}>>,");
+                if signature.retptr { let _ = writeln!(self.out, "        pub {name}_post: Option<wasmtime::TypedFunc<i32, ()>>,"); }
             }
         }
         let _ = writeln!(self.out, "    }}");
         let _ = writeln!(self.out);
-        let _ = writeln!(
-            self.out,
-            "    impl CoreExports {{\n        pub fn new<T: AsContextMut>(instance: &Instance, mut store: T) -> Result<Self, String> {{"
-        );
+        let _ = writeln!(self.out, "    impl CoreExports {{\n        pub fn new<T: AsContextMut>(instance: &Instance, mut store: T) -> Result<Self, String> {{");
         let _ = writeln!(self.out, "        Ok(Self {{");
         for (name, function) in &freestanding {
             let field = Self::sanitize_field(name);
-            let (call_ty, post_ty) = if function.result.is_some() {
-                ("(), i32", "i32, ()")
-            } else {
-                ("(), ()", "i32, ()")
-            };
-            let _ = writeln!(
-                self.out,
-                "            {field}: instance.get_typed_func::<{call_ty}>(&mut store, {name:?}).ok(),",
-            );
-            let _ = writeln!(
-                self.out,
-                "            {field}_post: instance.get_typed_func::<{post_ty}>(&mut store, \"cabi_post_{name}\").ok(),",
-            );
+            let signature = self.resolve.wasm_signature(AbiVariant::GuestExport, function);
+            let params = Self::wasm_tuple_type(&signature.params);
+            let results = if signature.retptr { "i32".to_owned() } else { Self::wasm_tuple_type(&signature.results) };
+            let _ = writeln!(self.out, "            {field}: instance.get_typed_func::<{params}, {results}>(&mut store, {name:?}).ok(),");
+            if signature.retptr { let _ = writeln!(self.out, "            {field}_post: instance.get_typed_func::<i32, ()>(&mut store, \"cabi_post_{name}\").ok(),"); }
         }
         for (_, interface) in &exports {
             for function in interface.functions.values() {
                 let name = Self::export_field_name(interface, function);
                 let export_name = self.export_core_name(interface, function);
-                let signature = self
-                    .resolve
-                    .wasm_signature(AbiVariant::GuestExport, function);
-                let flat = signature
-                    .params
-                    .iter()
-                    .map(|ty| Self::wasm_ty_name(ty))
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                let result_ty = if signature.retptr {
-                    "i32".to_owned()
-                } else if signature.results.is_empty() {
-                    "()".to_owned()
-                } else {
-                    "i32".to_owned()
-                };
-                let _ = writeln!(
-                    self.out,
-                    "            {name}: instance.get_typed_func::<({flat}), {result_ty}>(&mut store, {export_name:?}).ok(),",
-                );
-                if signature.retptr {
-                    let _ = writeln!(
-                        self.out,
-                        "            {name}_post: instance.get_typed_func::<i32, ()>(&mut store, \"cabi_post_{export_name}\").ok(),",
-                    );
-                }
+                let signature = self.resolve.wasm_signature(AbiVariant::GuestExport, function);
+                let params = Self::wasm_tuple_type(&signature.params);
+                let results = if signature.retptr { "i32".to_owned() } else { Self::wasm_tuple_type(&signature.results) };
+                let _ = writeln!(self.out, "            {name}: instance.get_typed_func::<{params}, {results}>(&mut store, {export_name:?}).ok(),");
+                if signature.retptr { let _ = writeln!(self.out, "            {name}_post: instance.get_typed_func::<i32, ()>(&mut store, \"cabi_post_{export_name}\").ok(),"); }
             }
         }
         let _ = writeln!(self.out, "        }})\n        }}");
         for (name, function) in &freestanding {
             let field = Self::sanitize_field(name);
-            match &function.result {
-                Some(ty) => {
-                    let result_ty = self.rust_type(ty);
-                    let _ = writeln!(
-                        self.out,
-                        "        pub fn call_{field}<T>(&self, instance: &Instance, store: &mut Store<T>) -> anyhow::Result<{result_ty}> {{"
-                    );
-                    let _ = writeln!(
-                        self.out,
-                        "            let func = self.{field}.as_ref().ok_or_else(|| anyhow::anyhow!(\"missing {name} export\"))?;"
-                    );
-                    let _ = writeln!(
-                        self.out,
-                        "            let retptr = func.call(&mut *store, ())?;"
-                    );
-                    let _ = writeln!(
-                        self.out,
-                        "            let mem = instance.get_export(&mut *store, \"memory\").and_then(|export| export.into_memory()).ok_or_else(|| anyhow::anyhow!(\"missing memory export\"))?;"
-                    );
-                    let value = self.emit_read_result(ty, "retptr", 0);
-                    let _ = writeln!(
-                        self.out,
-                        "            if let Some(post) = &self.{field}_post {{ post.call(&mut *store, retptr)?; }}"
-                    );
+            let signature = self.resolve.wasm_signature(AbiVariant::GuestExport, function);
+            let result_ty = function.result.as_ref().map(|ty| self.rust_type(ty)).unwrap_or_else(|| "()".to_owned());
+            let mut params = vec!["store: &mut Store<T>".to_owned()];
+            if signature.retptr || !function.params.is_empty() { params.insert(0, "instance: &Instance".to_owned()); }
+            for param in &function.params { params.push(format!("{}: {}", Self::sanitize_field(&param.name), self.rust_type(&param.ty))); }
+            let _ = writeln!(self.out, "        pub fn call_{field}<T>(&self, {}) -> anyhow::Result<{result_ty}> {{", params.join(", "));
+            let _ = writeln!(self.out, "            let func = self.{field}.as_ref().ok_or_else(|| anyhow::anyhow!(\"missing {name} export\"))?;");
+            let mut args = Vec::new();
+            for param in &function.params { args.extend(self.emit_param_flat(&param.ty, &Self::sanitize_field(&param.name), false)); }
+            let call = format!("func.call(&mut *store, {})", Self::wasm_call_args(&args));
+            match function.result.as_ref() {
+                Some(ty) if signature.retptr => {
+                    let _ = writeln!(self.out, "            let mem = instance.get_export(&mut *store, \"memory\").and_then(|export| export.into_memory()).ok_or_else(|| anyhow::anyhow!(\"missing memory export\"))?;");
+                    let retptr = self.bind(format!("{call}?"));
+                    let value = self.emit_read_result(ty, &retptr, 0);
+                    let _ = writeln!(self.out, "            if let Some(post) = &self.{field}_post {{ post.call(&mut *store, {retptr})?; }}");
                     let _ = writeln!(self.out, "            Ok({value})");
-                    let _ = writeln!(self.out, "        }}");
                 }
-                None => {
-                    let _ = writeln!(
-                        self.out,
-                        "        pub fn call_{field}<T>(&self, store: &mut Store<T>) -> anyhow::Result<()> {{"
-                    );
-                    let _ = writeln!(
-                        self.out,
-                        "            let func = self.{field}.as_ref().ok_or_else(|| anyhow::anyhow!(\"missing {name} export\"))?;"
-                    );
-                    let _ = writeln!(self.out, "            func.call(&mut *store, ())?;");
-                    let _ = writeln!(self.out, "            Ok(())");
-                    let _ = writeln!(self.out, "        }}");
+                Some(ty) => {
+                    let raw = self.bind(format!("{call}?"));
+                    let value = self.emit_direct_result(ty, &raw);
+                    let _ = writeln!(self.out, "            Ok({value})");
                 }
+                None => { let _ = writeln!(self.out, "            {call}?;\n            Ok(())"); }
             }
+            let _ = writeln!(self.out, "        }}");
         }
         for (_, interface) in &exports {
             for function in interface.functions.values() {
@@ -1963,22 +1921,20 @@ fn lift_list_string_at<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, o
                 flat_args.extend(self.emit_param_flat(&param.ty, name, false));
             }
         }
-        let call = format!("func.call({store_expr}, ({}))", flat_args.join(", "));
+        let call = format!("func.call({store_expr}, {})", Self::wasm_call_args(&flat_args));
         if let Some(result_ty) = &function.result {
-            let retptr = self.bind(format!(
-                "{call}.map_err(|error| anyhow::anyhow!(\"{export_name} failed: {{error}}\"))?"
-            ));
-            let value = self.emit_read_result(result_ty, &retptr, 0);
-            let _ = writeln!(
-                self.out,
-                "            if let Some(post) = &self.{field}_post {{ post.call({store_expr}, {retptr}).map_err(|error| anyhow::anyhow!(\"cabi_post {export_name} failed: {{error}}\"))?; }}"
-            );
-            let _ = writeln!(self.out, "            Ok({value})");
+            if signature.retptr {
+                let retptr = self.bind(format!("{call}.map_err(|error| anyhow::anyhow!(\"{export_name} failed: {{error}}\"))?"));
+                let value = self.emit_read_result(result_ty, &retptr, 0);
+                let _ = writeln!(self.out, "            if let Some(post) = &self.{field}_post {{ post.call({store_expr}, {retptr}).map_err(|error| anyhow::anyhow!(\"cabi_post {export_name} failed: {{error}}\"))?; }}");
+                let _ = writeln!(self.out, "            Ok({value})");
+            } else {
+                let raw = self.bind(format!("{call}.map_err(|error| anyhow::anyhow!(\"{export_name} failed: {{error}}\"))?"));
+                let value = self.emit_direct_result(result_ty, &raw);
+                let _ = writeln!(self.out, "            Ok({value})");
+            }
         } else {
-            let _ = writeln!(
-                self.out,
-                "            {call}.map_err(|error| anyhow::anyhow!(\"{export_name} failed: {{error}}\"))?;"
-            );
+            let _ = writeln!(self.out, "            {call}.map_err(|error| anyhow::anyhow!(\"{export_name} failed: {{error}}\"))?;");
             let _ = writeln!(self.out, "            Ok(())");
         }
         let _ = writeln!(self.out, "        }}");
@@ -1987,37 +1943,11 @@ fn lift_list_string_at<T>(caller: &mut Caller<'_, T>, mem: &Memory, base: i32, o
     fn export_field_name(interface: &Interface, function: &Function) -> String {
         let iface = interface.name.clone().expect("interface name");
         let item = function.item_name();
-        let field = if matches!(
-            function.kind,
-            FunctionKind::Method(_)
-                | FunctionKind::Static(_)
-                | FunctionKind::Constructor(_)
-                | FunctionKind::AsyncMethod(_)
-                | FunctionKind::AsyncStatic(_)
-                | FunctionKind::AsyncFreestanding
-        ) {
-            let resource = match &function.kind {
-                FunctionKind::Method(resource)
-                | FunctionKind::Static(resource)
-                | FunctionKind::Constructor(resource)
-                | FunctionKind::AsyncMethod(resource)
-                | FunctionKind::AsyncStatic(resource) => *resource,
-                _ => unreachable!(),
-            };
-            let resource_name = interface
-                .types
-                .iter()
-                .find_map(|(name, id)| (*id == resource).then(|| name.clone()))
-                .expect("resource name");
-            format!(
-                "{}_{}_method_{}",
-                Self::rust_ident(&iface).to_lowercase(),
-                Self::rust_ident(&resource_name).to_lowercase(),
-                item
-            )
-        } else {
-            format!("{}_{}", Self::rust_ident(&iface).to_lowercase(), item)
-        };
+        let field = if matches!(function.kind, FunctionKind::Method(_) | FunctionKind::Static(_) | FunctionKind::Constructor(_) | FunctionKind::AsyncMethod(_) | FunctionKind::AsyncStatic(_) | FunctionKind::AsyncFreestanding) {
+            let resource = match &function.kind { FunctionKind::Method(resource) | FunctionKind::Static(resource) | FunctionKind::Constructor(resource) | FunctionKind::AsyncMethod(resource) | FunctionKind::AsyncStatic(resource) => *resource, _ => unreachable!() };
+            let resource_name = interface.types.iter().find_map(|(name, id)| (*id == resource).then(|| name.clone())).expect("resource name");
+            format!("{}_{}_method_{}", Self::rust_ident(&iface).to_lowercase(), Self::rust_ident(&resource_name).to_lowercase(), item)
+        } else { format!("{}_{}", Self::rust_ident(&iface).to_lowercase(), item) };
         field.replace('-', "_")
     }
 
