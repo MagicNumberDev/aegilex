@@ -955,20 +955,6 @@ impl GuestHandles {
         }
     }
 
-    pub(crate) fn actor_death_event_mut(
-        &mut self,
-        invocation_id: u64,
-        handle: u64,
-    ) -> Option<std::pin::Pin<&mut ActorDeathEventFacade>> {
-        let entry = self.entries.get_mut(&handle)?;
-        if entry.invocation_id != invocation_id {
-            return None;
-        }
-        match entry.value {
-            GuestHandle::ActorDeathEvent(ref mut value) => value.as_mut(),
-            _ => None,
-        }
-    }
 
     pub(crate) fn actor_explode_event(
         &self,
@@ -1059,20 +1045,6 @@ impl GuestHandles {
         }
     }
 
-    pub(crate) fn actor_remove_event_mut(
-        &mut self,
-        invocation_id: u64,
-        handle: u64,
-    ) -> Option<std::pin::Pin<&mut ActorRemoveEventFacade>> {
-        let entry = self.entries.get_mut(&handle)?;
-        if entry.invocation_id != invocation_id {
-            return None;
-        }
-        match entry.value {
-            GuestHandle::ActorRemoveEvent(ref mut value) => value.as_mut(),
-            _ => None,
-        }
-    }
 
     pub(crate) fn actor_spawn_event(
         &self,
@@ -1215,20 +1187,6 @@ impl GuestHandles {
         }
     }
 
-    pub(crate) fn map_initialize_event_mut(
-        &mut self,
-        invocation_id: u64,
-        handle: u64,
-    ) -> Option<std::pin::Pin<&mut MapInitializeEventFacade>> {
-        let entry = self.entries.get_mut(&handle)?;
-        if entry.invocation_id != invocation_id {
-            return None;
-        }
-        match entry.value {
-            GuestHandle::MapInitializeEvent(ref mut value) => value.as_mut(),
-            _ => None,
-        }
-    }
 
     pub(crate) fn script_message_event(
         &self,
@@ -1460,35 +1418,7 @@ impl GuestHandles {
         }
     }
 
-    pub(crate) fn player_bed_leave_event_mut(
-        &mut self,
-        invocation_id: u64,
-        handle: u64,
-    ) -> Option<std::pin::Pin<&mut PlayerBedLeaveEventFacade>> {
-        let entry = self.entries.get_mut(&handle)?;
-        if entry.invocation_id != invocation_id {
-            return None;
-        }
-        match entry.value {
-            GuestHandle::PlayerBedLeaveEvent(ref mut value) => value.as_mut(),
-            _ => None,
-        }
-    }
 
-    pub(crate) fn player_dimension_change_event_mut(
-        &mut self,
-        invocation_id: u64,
-        handle: u64,
-    ) -> Option<std::pin::Pin<&mut PlayerDimensionChangeEventFacade>> {
-        let entry = self.entries.get_mut(&handle)?;
-        if entry.invocation_id != invocation_id {
-            return None;
-        }
-        match entry.value {
-            GuestHandle::PlayerDimensionChangeEvent(ref mut value) => value.as_mut(),
-            _ => None,
-        }
-    }
 
     pub(crate) fn player_respawn_event(
         &self,
@@ -1501,20 +1431,6 @@ impl GuestHandles {
         }
     }
 
-    pub(crate) fn player_respawn_event_mut(
-        &mut self,
-        invocation_id: u64,
-        handle: u64,
-    ) -> Option<std::pin::Pin<&mut PlayerRespawnEventFacade>> {
-        let entry = self.entries.get_mut(&handle)?;
-        if entry.invocation_id != invocation_id {
-            return None;
-        }
-        match entry.value {
-            GuestHandle::PlayerRespawnEvent(ref mut value) => value.as_mut(),
-            _ => None,
-        }
-    }
 
     pub(crate) fn player_item_held_event(
         &self,
@@ -2010,20 +1926,6 @@ impl GuestHandles {
         }
     }
 
-    pub(crate) fn plugin_lifecycle_event_mut(
-        &mut self,
-        invocation_id: u64,
-        handle: u64,
-    ) -> Option<std::pin::Pin<&mut PluginLifecycleEventFacade>> {
-        let entry = self.entries.get_mut(&handle)?;
-        if entry.invocation_id != invocation_id {
-            return None;
-        }
-        match entry.value {
-            GuestHandle::PluginLifecycleEvent(ref mut value) => value.as_mut(),
-            _ => None,
-        }
-    }
 
     pub(crate) fn server_load_event(
         &self,
@@ -2036,20 +1938,6 @@ impl GuestHandles {
         }
     }
 
-    pub(crate) fn server_load_event_mut(
-        &mut self,
-        invocation_id: u64,
-        handle: u64,
-    ) -> Option<std::pin::Pin<&mut ServerLoadEventFacade>> {
-        let entry = self.entries.get_mut(&handle)?;
-        if entry.invocation_id != invocation_id {
-            return None;
-        }
-        match entry.value {
-            GuestHandle::ServerLoadEvent(ref mut value) => value.as_mut(),
-            _ => None,
-        }
-    }
 
     pub(crate) fn chunk_event(&self, invocation_id: u64, handle: u64) -> Option<&ChunkEventFacade> {
         match self.entry(invocation_id, handle)?.value {
@@ -2058,20 +1946,6 @@ impl GuestHandles {
         }
     }
 
-    pub(crate) fn chunk_event_mut(
-        &mut self,
-        invocation_id: u64,
-        handle: u64,
-    ) -> Option<std::pin::Pin<&mut ChunkEventFacade>> {
-        let entry = self.entries.get_mut(&handle)?;
-        if entry.invocation_id != invocation_id {
-            return None;
-        }
-        match entry.value {
-            GuestHandle::ChunkEvent(ref mut value) => value.as_mut(),
-            _ => None,
-        }
-    }
 
     pub(crate) fn player_inventory(
         &self,

@@ -1,4 +1,5 @@
 pub(crate) mod block;
 pub(crate) mod chunk;
 pub(crate) mod dimension;
-pub(crate) mod level;
+#[path = "level.rs"]
+pub(crate) mod level_impl;

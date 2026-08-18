@@ -1,4 +1,5 @@
-pub(crate) mod inventory;
+#[path = "inventory.rs"]
+pub(crate) mod inventory_impl;
 pub(crate) mod item_meta;
 pub(crate) mod item_stack;
 pub(crate) mod item_type;

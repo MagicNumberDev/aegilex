@@ -2,20 +2,7 @@
 
 use super::support::*;
 
-fn resolve_event_mut(
-    state: &mut PluginStoreState,
-    event: u32,
-) -> Result<std::pin::Pin<&mut cxx_event::PlayerQuitEventFacade>, HostError> {
-    let handle = state
-        .resource_slot(event, ResourceKind::PlayerQuitEvent)
-        .map_err(|_| HostError::from_status(AEGILEX_NOT_FOUND))?
-        .handle;
-    let invocation_id = state.invocation_id;
-    state
-        .handles
-        .player_quit_event_mut(invocation_id, handle)
-        .ok_or_else(|| HostError::from_status(AEGILEX_NOT_FOUND))
-}
+
 
 fn player_quit_event_handle(state: &PluginStoreState, event: u32) -> Result<u64, HostError> {
     state
